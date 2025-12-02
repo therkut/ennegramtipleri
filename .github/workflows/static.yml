@@ -34,12 +34,12 @@ jobs:
       # ----------------------------------------------------------------------------------
       # ÖNEMLİ ADIM: API Anahtarını JavaScript Koduna Enjekte Etme
       # ----------------------------------------------------------------------------------
-      # Bu adım, index.html dosyasındaki "!!API_KEY_PLACEHOLDER!!" yer tutucusunu 
+      # Bu adım, analiz.html dosyasındaki "!!API_KEY_PLACEHOLDER!!" yer tutucusunu 
       # GitHub Secret'ınız olan GEMINI_API_KEY değeriyle değiştirir.
       - name: Inject API Key into JavaScript
         run: |
           # API key'in bulunduğu HTML dosyasının adını belirtin
-          HTML_FILE="index.html" 
+          HTML_FILE="analiz.html" 
           
           # sed komutu ile yer tutucuyu, GitHub Secret değeriyle değiştir
           # Not: 's|...|...|g' formatı, anahtar içinde / veya & gibi karakterler olsa bile güvenli değiştirme sağlar.
