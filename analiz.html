@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İki Tip Arası Dinamik İletişim Simülatörü</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Inter font for modern look */
+        :root {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Tüm çıktı blokları için temel yapı (Senaryo, Çözüm, Analiz) */
+        .speech-bubble, .result-block-container {
+            padding: 1rem 1.5rem; /* Konuşma balonlarına daha fazla yatay dolgu */
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease-in-out;
+            margin-bottom: 1rem;
+        }
+
+        /* SENARYO DİYALOGLARI */
+        .speech-bubble-sender {
+            background-color: #eef2ff; /* Indigo-50 */
+            border-left: 5px solid #6366f1; /* Indigo-500 */
+        }
+        .speech-bubble-receiver {
+            background-color: #f0fdf4; /* Green-50 */
+            border-left: 5px solid #10b981; /* Green-500 */
+        }
+
+        /* ANALİZ/ÇÖZÜM ÇIKTILARI İÇİN YENİ STİL (Diyalog Kutusu Benzeri) */
+        .result-block-container {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Çözüm Bloku - Yeşil Tema */
+        .solution-block {
+            background-color: #f0fdf4; /* Green-50 */
+            border-left: 6px solid #059669; /* Green-600 */
+        }
+        .solution-block h4 {
+            color: #059669;
+        }
+
+        /* Analiz Bloku - Mor Tema */
+        .analysis-block {
+            background-color: #f5f3ff; /* Purple-50 */
+            border-left: 6px solid #8b5cf6; /* Purple-500 */
+        }
+        .analysis-block h4 {
+            color: #8b5cf6;
+        }
+
+        /* Analiz İçindeki Başlıklar (Markdown çıktıları için) - GÜNCELLENDİ */
+        .analysis-block h5, .solution-block h5 {
+            font-weight: bold;
+            font-size: 1.125rem; /* text-lg */
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            padding: 0.5rem 0;
+            border-bottom: 2px solid rgba(139, 92, 246, 0.4); /* Mor alt çizgi */
+            color: #4f46e5; /* İndigo Tonu */
+            display: flex;
+            align-items: center;
+        }
+        
+        .solution-block h5 {
+            border-bottom: 2px solid rgba(5, 150, 105, 0.4); /* Yeşil alt çizgi */
+            color: #059669;
+        }
+        
+        /* Listeler ve Maddeler */
+        .analysis-block ul, .solution-block ul {
+            list-style: disc;
+            margin-left: 1.5rem;
+            padding-left: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        /* Çatışma Dinamikleri için Diyalog Stilini taklit eden blok */
+        .conflict-dynamic-block {
+            background-color: #ffe4e6; /* Red-100 */
+            border-left: 4px solid #f43f5e; /* Rose-500 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .dynamic-speaker {
+            font-weight: bold;
+            color: #be185d; /* Rose-700 */
+        }
+
+        /* Çözüm Diyalogları İçin Konteyner Stili */
+        .solution-dialogue-container {
+            border: 1px dashed #a7f3d0; /* Green-200 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: #ecfdf5; 
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Tip Kartı Stili */
+        .type-card {
+            border-radius: 12px;
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+        }
+        .type-card-header {
+            padding: 1rem;
+            border-radius: 12px 12px 0 0;
+        }
+        .type-card-body {
+            padding: 1.5rem;
+            background-color: #ffffff;
+        }
+
+        /* Custom spinner for loading state */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #4f46e5;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-4 sm:p-8 min-h-screen flex flex-col items-center">
+
+    <div class="max-w-4xl w-full bg-white shadow-2xl rounded-xl p-6 md:p-10 border border-gray-100 mt-8 mb-8">
+
+        <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800 mb-6 border-b pb-2 flex items-center">
+            <span class="mr-2 text-yellow-500">✨</span> İki Tip Arası Dinamik İletişim Simülasyonu
+        </h1>
+        
+        <!-- Tip Seçim Alanı -->
+        <div class="bg-indigo-50 border border-indigo-200 p-5 rounded-lg mb-8 shadow-inner">
+            <p class="font-semibold text-indigo-700 mb-4 text-center">İletişim Dinamiklerini Ayarlayın</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="sender-type" class="block text-sm font-medium text-gray-700">Tip 1 (Gönderici):</label>
+                    <select id="sender-type" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md shadow-sm">
+                        <!-- Seçenekler JS ile doldurulacak -->
+                    </select>
+                </div>
+                <div>
+                    <label for="receiver-type" class="block text-sm font-medium text-gray-700">Tip 2 (Alıcı):</label>
+                    <select id="receiver-type" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md shadow-sm">
+                        <!-- Seçenekler JS ile doldurulacak -->
+                    </select>
+                </div>
+            </div>
+            
+            <button id="generate-scenario-button" class="mt-6 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 shadow-lg flex items-center justify-center disabled:opacity-50">
+                <span class="mr-2">⚡</span> İletişim Senaryosu Oluştur
+            </button>
+        </div>
+
+
+        <!-- DİYALOG VE SENARYO ALANI -->
+        <h2 class="text-xl font-semibold text-gray-700 mb-4 flex items-center border-b pb-2">
+            <span class="mr-2 text-gray-400">💬</span> Senaryo Sonucu
+        </h2>
+        
+        <div id="dialogue-area" class="min-h-[150px] space-y-4 mb-8 bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <div id="initial-dialogue">
+                <p class="text-gray-500 italic text-center p-4">
+                    Lütfen yukarıdan iki Enneagram tipi seçin ve **İletişim Senaryosu Oluştur** düğmesine tıklayın.
+                </p>
+            </div>
+        </div>
+
+        <!-- YENİ LLM ARAÇLARI -->
+        <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center border-b pb-2">
+            <span class="mr-2 text-yellow-600">🛠️</span> Analiz ve Çözüm Araçları
+        </h3>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            <button id="solve-button" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 shadow-md flex items-center justify-center disabled:opacity-50">
+                <span class="mr-2">🤝</span> Alternatif Çözüm Önerisi Üret
+            </button>
+            <button id="analyze-button" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 shadow-md flex items-center justify-center disabled:opacity-50">
+                <span class="mr-2">🔍</span> Derinlemesine Analiz (Grounding)
+            </button>
+        </div>
+
+        <!-- ANALİZ/ÇÖZÜM SONUÇ ALANI -->
+        <div id="result-area" class="min-h-[100px] bg-white border border-gray-200 rounded-lg p-4 transition-all duration-300 mb-10">
+            <p id="placeholder-text" class="text-gray-500 italic">Analiz ve Çözüm araçlarını kullanmak için önce bir senaryo oluşturun.</p>
+            <div id="loading-spinner" class="hidden flex justify-center items-center h-full">
+                <div class="spinner"></div>
+            </div>
+            <div id="analysis-content" class="hidden text-gray-800">
+                <!-- LLM sonuçları buraya yerleştirilecek -->
+            </div>
+        </div>
+        
+        <!-- EMPATİK ÇEVİRİ ALANI -->
+        <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center border-b pb-2">
+            <span class="mr-2 text-pink-500">💬</span> Empatik Diyalog Çevirici
+        </h3>
+
+        <div class="bg-pink-50 border border-pink-200 rounded-lg p-5">
+            <p class="text-sm text-gray-700 mb-3">Oluşturulan senaryodan rahatsız edici bir cümleyi kopyalayıp buraya yapıştırın ve Gemini'nin daha empatik bir karşılık önermesini izleyin.</p>
+            
+            <textarea id="dialogue-input" rows="3" class="w-full p-3 mb-4 border border-pink-300 rounded-lg focus:ring-pink-500 focus:border-pink-500" placeholder="Örn: 'Bu bütçe tablosunu yeniden yapmalıyız, sütunların hepsi yanlış hizada.'"></textarea>
+
+            <button id="translate-button" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 shadow-md flex items-center justify-center disabled:opacity-50">
+                <span class="mr-2">🧠</span> Empatik Tona Çevir
+            </button>
+
+            <div id="translation-result-area" class="mt-4 p-4 min-h-[50px] bg-white border border-pink-300 rounded-lg hidden">
+                <h4 class="font-bold text-pink-700 mb-2">Empatik Çeviri Sonucu:</h4>
+                <p id="translation-output" class="text-gray-700 italic">Sonuç bekleniyor...</p>
+            </div>
+            <div id="translation-loading-spinner" class="hidden flex justify-center items-center h-full mt-4">
+                <div class="spinner"></div>
+            </div>
+            <p id="translation-error-message" class="text-red-600 mt-2 hidden">Hata oluştu.</p>
+        </div>
+
+    </div>
+
+    <!-- ENNEAGRAM TİP KARTLARI BÖLÜMÜ (Ekran görüntülerinizden esinlenildi) -->
+    <div class="max-w-4xl w-full mt-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center border-b pb-2">
+            <span class="mr-2 text-indigo-600">📖</span> Seçilen Enneagram Tiplerinin Detayları
+        </h2>
+        
+        <div id="type-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Tip kartları buraya JS ile yüklenecek -->
+        </div>
+    </div>
+
+
+    <!-- Firebase ve Gemini API İSTEMCİ KODU -->
+    <script type="module">
+        // Firebase Modülleri (Kullanılmasa bile Canvas gereklilikleri için dahil edilmelidir)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, setLogLevel } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // UI Elementleri (Genel)
+        const senderTypeSelect = document.getElementById('sender-type');
+        const receiverTypeSelect = document.getElementById('receiver-type');
+        const dialogueArea = document.getElementById('dialogue-area');
+        const placeholderText = document.getElementById('placeholder-text');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const analysisContent = document.getElementById('analysis-content');
+
+        // UI Elementleri (Butonlar)
+        const generateScenarioButton = document.getElementById('generate-scenario-button');
+        const solveButton = document.getElementById('solve-button');
+        const analyzeButton = document.getElementById('analyze-button');
+        
+        // UI Elementleri (Çeviri)
+        const dialogueInput = document.getElementById('dialogue-input');
+        const translateButton = document.getElementById('translate-button');
+        const translationResultArea = document.getElementById('translation-result-area');
+        const translationOutput = document.getElementById('translation-output');
+        const translationLoadingSpinner = document.getElementById('translation-loading-spinner');
+        const translationErrorMessage = document.getElementById('translation-error-message');
+
+
+        // Sabitler
+        const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
+        const API_KEY = ""; // Canvas tarafından sağlanacaktır
+        
+        // Enneagram Tipleri Verisi (Dinamik doldurma ve prompt oluşturma için)
+        const ENNEAGRAM_TYPES = [
+            { id: 1, name: "Reformcu", motivation: "Doğru ve dürüst olmak, mükemmellik.", fear: "Hata yapmak, kusurlu olmak.", color: "red-700", icon: "⚖️", headerBg: "bg-red-100", details: "Temel Arzu: Kusursuzluğa ulaşmak, erdemli olmak. Temel Korku: Yanlış, kusurlu veya kötü olmak. Stres (4'e Gider): Kendi duygusal ihtiyaçlarına odaklanır, dramatikleşebilir. Gelişim (7'ye Gider): Daha spontane ve neşeli olur, eylem odaklıdır." },
+            { id: 2, name: "Yardımsever", motivation: "Sevilmek, ilgi görmek, başkalarına hizmet etmek.", fear: "Sevilmemek, istenmemek.", color: "pink-700", icon: "❤️", headerBg: "bg-pink-100", details: "Temel Arzu: Sevilmek, başkaları tarafından takdir edilmek. Temel Korku: Sevilmemek, muhtaç görünmek. Stres (8'e Gider): Kontrolcü ve baskın olabilir, öfkesini dışa vurur. Gelişim (4'e Gider): Kendi ihtiyaçlarına odaklanır, duygusal olarak daha dürüst olur." },
+            { id: 3, name: "Başarıcı", motivation: "Değerli ve takdir edilmek, başarılı olmak.", fear: "Değersiz olmak, başarısız olmak.", color: "yellow-700", icon: "🏆", headerBg: "bg-yellow-100", details: "Temel Arzu: Değerli ve etkileyici olmak. Temel Korku: Değersiz veya başarısız olmak. Stres (9'a Gider): İşleri yavaşlatabilir, motivasyonunu kaybedebilir. Gelişim (6'ya Gider): Daha işbirlikçi ve sorumlu, güvenilir olur." },
+            { id: 4, name: "Bireysel", motivation: "Eşsiz ve anlamlı olmak, derin duygusal deneyim.", fear: "Önemsiz olmak, kusurlu olmak.", color: "purple-700", icon: "🎭", headerBg: "bg-purple-100", details: "Temel Arzu: Kendini ve dünyayı anlamak, otantik olmak. Temel Korku: Kimliksiz veya sıradan olmak. Stres (2'ye Gider): Başkalarına aşırı bağımlı olabilir, ilgi çekmek için fedakarlık yapar. Gelişim (1'e Gider): Daha objektif ve eyleme odaklı, duygusallıktan uzaklaşır." },
+            { id: 5, name: "Araştırmacı", motivation: "Yetkin ve yeterli olmak, bilgi birikimi.", fear: "Yetersiz olmak, tükenmek.", color: "teal-700", icon: "🧠", headerBg: "bg-teal-100", details: "Temel Arzu: Dünyayı anlamak, yetkin olmak. Temel Korku: Yetkisiz, bilgisiz veya kapasitesi tükenmiş olmak. Stres (7'ye Gider): Aşırı aktivite, dağınıklık ve dikkat dağınıklığı yaşar. Gelişim (8'e Gider): Daha kararlı, eyleme dönük ve dünyayla etkileşim kuran biri olur." },
+            { id: 6, name: "Sorgulayıcı", motivation: "Güvenli ve desteklenmiş olmak, rehberlik.", fear: "Desteksiz kalmak, yolunu şaşırmak.", color: "blue-700", icon: "🛡️", headerBg: "bg-blue-100", details: "Temel Arzu: Güvenli ve emniyette olmak. Temel Korku: Desteksiz kalmak, tehlike. Stres (3'e Gider): Çok çalışır, onaylanma arar, başarı odaklı olur. Gelişim (9'a Gider): Daha huzurlu, kendine güvenir ve sakin kalır." },
+            { id: 7, name: "İstekli", motivation: "Mutlu ve tatmin olmak, seçeneklere sahip olmak.", fear: "Acı çekmek, mahrum kalmak.", color: "orange-700", icon: "🚀", headerBg: "bg-orange-100", details: "Temel Arzu: Mutlu olmak, acıdan kaçınmak. Temel Korku: Mahrum kalmak, acı çekmek. Stres (1'e Gider): Eleştirel, yargılayıcı ve mükemmeliyetçi olur. Gelişim (5'e Gider): Daha derin, odaklanmış ve bilgi birikimine önem veren biri olur." },
+            { id: 8, name: "Meydan Okuyan", motivation: "Kendini korumak, bağımsızlık, kontrol.", fear: "Kontrol edilmek, zayıf görünmek.", color: "indigo-700", icon: "👊", headerBg: "bg-indigo-100", details: "Temel Arzu: Kendi kaderini belirlemek, güçlü olmak. Temel Korku: Kontrol edilmek, zayıf olmak. Stres (5'e Gider): İçine kapanık, izole ve bilgi toplama eğilimine girer. Gelişim (2'ye Gider): Daha merhametli ve başkalarının ihtiyaçlarına duyarlı olur." },
+            { id: 9, name: "Barışçı", motivation: "Huzurlu ve uyumlu olmak, çatışmadan kaçınmak.", fear: "Çatışma ve ayrılık.", color: "green-700", icon: "🕊️", headerBg: "bg-green-100", details: "Temel Arzu: İç huzuru korumak, kabul görmek. Temel Korku: Çatışma, ayrılık veya kayıp. Stres (6'ya Gider): Endişeli, şüpheci ve güvence arayışında olur. Gelişim (3'e Gider): Daha kararlı, eyleme geçer ve hedeflerine odaklanır." }
+        ];
+
+        // Firebase Başlangıç Ayarları
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        if (Object.keys(firebaseConfig).length > 0) {
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+            const auth = getAuth(app);
+            setLogLevel('Debug');
+            
+            async function authenticate() {
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Firebase kimlik doğrulama hatası:", error);
+                }
+            }
+            authenticate();
+        }
+
+
+        // UTILITY: Dropdownları doldurur
+        function populateTypeSelects() {
+            ENNEAGRAM_TYPES.forEach(type => {
+                const optionSender = document.createElement('option');
+                optionSender.value = type.id;
+                optionSender.textContent = `${type.id} - ${type.name}`;
+                senderTypeSelect.appendChild(optionSender);
+
+                const optionReceiver = document.createElement('option');
+                optionReceiver.value = type.id;
+                optionReceiver.textContent = `${type.id} - ${type.name}`;
+                receiverTypeSelect.appendChild(optionReceiver);
+            });
+            // Varsayılan seçimler (Örn: Tip 1 ve Tip 9)
+            senderTypeSelect.value = 1;
+            receiverTypeSelect.value = 9;
+        }
+
+        // UTILITY: Seçilen tipler değiştiğinde kartları günceller
+        function updateTypeCards() {
+            const senderType = ENNEAGRAM_TYPES.find(t => t.id == senderTypeSelect.value);
+            const receiverType = ENNEAGRAM_TYPES.find(t => t.id == receiverTypeSelect.value);
+
+            const typeCardsContainer = document.getElementById('type-cards-container');
+            typeCardsContainer.innerHTML = `
+                ${createTypeCardHTML(senderType, 'Gönderici (Tip 1)')}
+                ${createTypeCardHTML(receiverType, 'Alıcı (Tip 2)')}
+            `;
+        }
+        
+        // UTILITY: Tek bir tip kartı için HTML oluşturur
+        function createTypeCardHTML(type, role) {
+            const parts = type.details.split('. ');
+            const arzu = parts.find(p => p.startsWith('Temel Arzu')) || 'Bilgi yok.';
+            const korku = parts.find(p => p.startsWith('Temel Korku')) || 'Bilgi yok.';
+            const stres = parts.find(p => p.startsWith('Stres')) || 'Bilgi yok.';
+            const gelisim = parts.find(p => p.startsWith('Gelişim')) || 'Bilgi yok.';
+            
+            return `
+                <div class="type-card border border-gray-200">
+                    <div class="type-card-header ${type.headerBg} flex justify-between items-center">
+                        <h4 class="text-xl font-bold text-${type.color}">${type.icon} Tip ${type.id}: ${type.name}</h4>
+                        <span class="text-sm font-semibold text-gray-600 px-3 py-1 bg-white rounded-full shadow-sm">${role}</span>
+                    </div>
+                    <div class="type-card-body space-y-3">
+                        <p class="text-sm">
+                            <span class="font-bold text-gray-700">Temel Arzu:</span> ${arzu.replace('Temel Arzu: ', '').replace('.', '')}
+                        </p>
+                        <p class="text-sm">
+                            <span class="font-bold text-gray-700">Temel Korku:</span> ${korku.replace('Temel Korku: ', '').replace('.', '')}
+                        </p>
+                        <p class="text-sm border-t pt-2 border-yellow-200">
+                            <span class="font-bold text-red-600">${stres.split(':')[0]}:</span> ${stres.split(':')[1]?.trim() || 'Bilgi yok.'}
+                        </p>
+                        <p class="text-sm border-t pt-2 border-green-200">
+                            <span class="font-bold text-green-600">${gelisim.split(':')[0]}:</span> ${gelisim.split(':')[1]?.trim() || 'Bilgi yok.'}
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+
+        // Genel API Çağrı Yardımcısı (Üstel Geri Çekilme ile)
+        async function callGeminiApi(payload, useSearch) {
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${API_KEY}`;
+            const maxRetries = 5;
+            let delay = 1000; 
+
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const finalPayload = {
+                        ...payload,
+                        tools: useSearch ? [{ "google_search": {} }] : undefined
+                    };
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(finalPayload)
+                    });
+
+                    if (!response.ok) {
+                        if (response.status === 429 && i < maxRetries - 1) {
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            delay *= 2; 
+                            continue;
+                        }
+                        throw new Error(`API hatası: ${response.statusText}`);
+                    }
+
+                    const result = await response.json();
+                    const candidate = result.candidates?.[0];
+
+                    if (candidate && candidate.content?.parts?.[0]?.text) {
+                        const text = candidate.content.parts[0].text;
+                        let sources = [];
+
+                        const groundingMetadata = candidate.groundingMetadata;
+                        if (useSearch && groundingMetadata && groundingMetadata.groundingAttributions) {
+                            sources = groundingMetadata.groundingAttributions
+                                .map(attribution => ({
+                                    uri: attribution.web?.uri,
+                                    title: attribution.web?.title,
+                                }))
+                                .filter(source => source.uri && source.title);
+                        }
+
+                        return { text, sources };
+                    }
+                    throw new Error("API'den geçerli içerik alınamadı.");
+
+                } catch (error) {
+                    console.error(`Gemini API çağrısında hata (Deneme ${i + 1}):`, error);
+                    if (i === maxRetries - 1) throw error; 
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                }
+            }
+        }
+
+        // UTILITY: JSON olarak dönen LLM çağrısı
+        async function callGeminiJsonApi(payload, schema) {
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${API_KEY}`;
+            
+            const finalPayload = {
+                ...payload,
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: schema
+                }
+            };
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(finalPayload)
+            });
+
+            if (!response.ok) {
+                 throw new Error(`API hatası: ${response.statusText}`);
+            }
+            
+            const result = await response.json();
+            let jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+            
+            if (jsonText) {
+                // 1. Clean markdown fences and common escape sequences
+                jsonText = jsonText.replace(/```json\s*/g, '')
+                                   .replace(/\s*```/g, '')
+                                   .replace(/\\"/g, '"') // Unescape internal quotes
+                                   .trim();
+
+                // 2. Find the index of the first opening bracket/brace and the last closing one.
+                const firstBracket = jsonText.indexOf('[');
+                const firstBrace = jsonText.indexOf('{');
+                let startIndex = -1;
+
+                // Determine the starting character
+                if (firstBracket !== -1 && (firstBrace === -1 || firstBracket < firstBrace)) {
+                    startIndex = firstBracket;
+                } else if (firstBrace !== -1) {
+                    startIndex = firstBrace;
+                }
+
+                if (startIndex === -1) {
+                    throw new Error("API'den JSON yapısı bulunamadı (Başlangıç parantezi/küme parantezi yok).");
+                }
+
+                // Find the last closing bracket/brace
+                const lastBracket = jsonText.lastIndexOf(']');
+                const lastBrace = jsonText.lastIndexOf('}');
+                let endIndex = -1;
+
+                // Determine the ending character
+                if (lastBracket > lastBrace) {
+                    endIndex = lastBracket;
+                } else if (lastBrace > lastBracket) {
+                    endIndex = lastBrace;
+                } else {
+                    // Handle cases where only one type exists or they are equal
+                    endIndex = Math.max(lastBracket, lastBrace);
+                }
+
+                if (endIndex === -1 || endIndex <= startIndex) {
+                    throw new Error("API'den JSON yapısı bulunamadı (Bitiş parantezi/küme parantezi yok veya geçersiz aralık).");
+                }
+
+                // Slice the string to include only the JSON content
+                jsonText = jsonText.substring(startIndex, endIndex + 1).trim();
+                
+                try {
+                    return JSON.parse(jsonText);
+                } catch (e) {
+                    console.error("JSON ayrıştırma hatası:", e);
+                    throw new Error("Düzgün JSON formatı alınamadı (Parsing başarısız).");
+                }
+            }
+            throw new Error("API'den geçerli içerik alınamadı.");
+        }
+
+
+        // LLM FEATURE 1: Yeni İlişki Senaryosu Oluştur (Structured JSON Output)
+        async function createNewScenario(senderType, receiverType) {
+            const systemPrompt = `Sen, bir senaryo yazarı ve Enneagram uzmanısın. ${senderType.name} (Gönderici) ve ${receiverType.name} (Alıcı) arasında, ${senderType.motivation} ve ${receiverType.fear} dinamiklerini içeren, tipik bir çatışmayı anlatan 4 satırlık bir diyalog senaryosu oluştur. YANITIN SADECE İSTENEN JSON DİZİSİ OLMALIDIR. BAŞLIK, AÇIKLAMA VEYA EK METİN KULLANMA. JSON dışında hiçbir metin üretme. JSON alanındaki metinlerde **kalın** veya *italik* Markdown işaretleri KULLANMA.`;
+            const userQuery = `Enneagram Tip ${senderType.id} (${senderType.name}) ve Tip ${receiverType.id} (${receiverType.name}) arasında gergin bir durumu yansıtan bir diyalog oluştur.`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+            };
+
+            const schema = {
+                type: "ARRAY",
+                items: {
+                    type: "OBJECT",
+                    properties: {
+                        "speaker_id": { "type": "INTEGER", "description": "Konuşmacının Enneagram Tip ID'si (Örn: 1 veya 9)" },
+                        "speaker_type": { "type": "STRING", "description": "Konuşmacının Enneagram Tipi ve Duygusal Durumu (Örn: Tip 1 (Gergin)" },
+                        "dialogue": { "type": "STRING", "description": "Konuşmacının sözü" }
+                    }
+                }
+            };
+            
+            return callGeminiJsonApi(payload, schema);
+        }
+
+        // LLM FEATURE 2: Alternatif Çözüm Önerisi (Structured JSON Output with Dialogue)
+        async function getAlternativeSolution(senderType, receiverType, scenarioText) {
+            const systemPrompt = `Sen, Enneagram konusunda uzman bir ilişki terapistisin. Amacın, verilen senaryodaki çatışmayı analiz etmek ve her iki tipin de temel ihtiyaçlarını (Tip ${senderType.id}'in temel motivasyonu: ${senderType.motivation} ve Tip ${receiverType.id}'in temel korkusu: ${receiverType.fear}) karşılayacak yaratıcı, dengeli bir uzlaşma senaryosu önermek. YANITIN SADECE İSTENEN JSON NESNESİ OLMALIDIR. Çıktı formatını kesinlikle takip et.`;
+            const userQuery = `Bu senaryo için uzlaşma planı öner: ${scenarioText}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+            };
+            
+            const schema = {
+                type: "OBJECT",
+                properties: {
+                    "title": { "type": "STRING", "description": "Uzlaşma senaryosuna kısa ve akılda kalıcı bir başlık (Örn: 'Standartlar ve Sakinlik')." },
+                    "initial_analysis": { "type": "STRING", "description": "Çatışmanın temel dinamiklerinin ve her iki tipin ihtiyaçlarının (markdown tabloları kullanmadan, paragraf olarak) kısa özeti." },
+                    "dialogue_scenario": { 
+                        "type": "ARRAY", 
+                        "description": "Tip 1 ve Tip 2'nin başarılı bir uzlaşma sağladığı 4-6 satırlık yeni diyalog.",
+                        "items": {
+                            "type": "OBJECT",
+                            "properties": {
+                                "speaker_id": { "type": "INTEGER", "description": "Konuşmacının Enneagram Tip ID'si (Örn: 1 veya 9)" },
+                                "speaker_type": { "type": "STRING", "description": "Konuşmacının Enneagram Tipi ve Durumu (Örn: Tip 9 (Sakin ve Kararlı)" },
+                                "dialogue": { "type": "STRING", "description": "Konuşmacının uzlaşmacı sözü" }
+                            },
+                            "required": ["speaker_id", "speaker_type", "dialogue"]
+                        }
+                    },
+                    "why_it_worked": { "type": "STRING", "description": "Uzlaşmanın neden işe yaradığını, her iki tipin de ihtiyaçlarının nasıl karşılandığını açıklayan bir paragraf." }
+                },
+                "required": ["title", "initial_analysis", "dialogue_scenario", "why_it_worked"]
+            };
+            
+            return callGeminiJsonApi(payload, schema);
+        }
+
+        // LLM FEATURE 3: Derinlemesine Analiz (Grounding/Search)
+        async function getDeepDiveAnalysis(senderType, receiverType) {
+            // Sistem talimatını daha iyi yapılandırılmış, temiz metin çıktısı vermeye zorluyoruz.
+            const systemPrompt = `Sen, Enneagram tiplerinin psikolojik derinliklerini analiz eden bir uzmansın. Cevabını 4 ana başlık altında, her başlığı ayrı bir satırda **kalın (bold)** ve ardından iki nokta üst üste (:) kullanarak yapılandır. Cevap formatı: Başlık: Açıklama. Maddeler (listeler) için * işareti kullan. Cevabın başlangıcında ve sonunda gereksiz metinler OLMAMALIDIR. Lütfen sadece Türkçe cevap ver.`;
+            const userQuery = `Enneagram Tip ${senderType.id} (${senderType.name}) ve Tip ${receiverType.id} (${receiverType.name})'in temel motivasyonları, korkuları ve bu iki tip arasındaki bir ilişkinin nasıl çatışmaya yol açabileceği hakkında derinlemesine bir analiz yap.`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+            };
+            // Google Search Grounding kullanarak güncel ve doğru bilgi al
+            return callGeminiApi(payload, true);
+        }
+
+        // LLM FEATURE 4: Empatik Çeviri (Text Rewriting)
+        async function getToneTranslation(text) {
+            const systemPrompt = "Sen, duygusal zeka ve iletişimi geliştirmede uzman bir danışmansın. Sana verilen diyaloğu, anlamını değiştirmeden, alıcının duygusal ihtiyaçlarını gözeten ve çatışmayı azaltan, empatik bir tonda yeniden yaz. Cevabın sadece yeniden yazılmış tek cümle olmalıdır.";
+            const userQuery = `Giriş: '${text}' Bu cümleyi daha empatik ve kabul edici bir tonda yeniden yaz.`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+            };
+            return callGeminiApi(payload, false);
+        }
+
+        // UTILITY: Tek bir analiz/çözüm bloğu için dış HTML'i oluşturur
+        function createAnalysisBlockHTML(title, contentHTML, isSolution = false, sources = [], senderIcon = null, receiverIcon = null) {
+            const blockClass = isSolution ? 'solution-block' : 'analysis-block';
+            
+            let sourcesHTML = '';
+            if (sources.length > 0) {
+                sourcesHTML = `
+                    <div id="sources-area" class="mt-4 pt-2 text-xs text-gray-500 border-t border-dashed border-gray-300">
+                        <p class="font-semibold mb-1">Kaynaklar (Google Arama):</p>
+                        <ul id="sources-list" class="list-disc ml-4 space-y-1">
+                            ${sources.map(source => `
+                                <li>
+                                    <a href="${source.uri}" target="_blank" class="text-indigo-600 hover:text-indigo-800 underline">
+                                        ${source.title}
+                                    </a>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            // Başlığa ikonları ekle
+            const finalTitle = senderIcon && receiverIcon 
+                ? `${senderIcon} ${title} ${receiverIcon}`
+                : `${isSolution ? '🤝' : '🔍'} ${title}`;
+
+
+            // Yeni tasarım: Diyalog kutusuna benziyor (result-block-container, blockClass)
+            return `
+                <div class="result-block-container ${blockClass} space-y-4">
+                    <h4 class="font-extrabold text-2xl mb-4 border-b pb-2">${finalTitle}</h4>
+                    <div class="text-gray-800 space-y-3">
+                        ${contentHTML}
+                    </div>
+                    ${sourcesHTML}
+                </div>
+            `;
+        }
+
+        // UTILITY: Metin Analiz Sonucunu Okunabilir HTML'e Çevirir (Markdown'dan HTML'e) - GÜNCELLENDİ
+        function renderAnalysisToHTML(rawText) {
+            const lines = rawText.split('\n');
+            let html = '';
+            let inList = false;
+            
+            const conflictIcons = {
+                "1'in Eleştirisi ve 9'un Ataleti": "⚖️ ↔️ 🕊️",
+                "9'un Geri Çekilmesi ve Pasif Direnç": "🕊️ ❌ ⚖️",
+                "Öfke Döngüsü": "🔄",
+                "İhmal Edilen Öfke": "🤫"
+            };
+            
+            const strategyIcons = {
+                "Tip 1 İçin Stratejiler": "✅ ⚖️",
+                "Tip 9 İçin Stratejiler": "✅ 🕊️"
+            };
+
+            lines.forEach(line => {
+                line = line.trim();
+                if (line.length === 0) return; 
+                
+                // Başlık/Bölüm Başlıkları (Örn: **Temel Motivasyonlar:**)
+                if (line.match(/^\*\*(.*?)\*\*:(.*)$/)) {
+                    if (inList) { html += '</ul>'; inList = false; }
+                    
+                    const match = line.match(/^\*\*(.*?)\*\*:(.*)$/);
+                    const headerText = match[1].trim();
+                    const content = match[2].trim();
+                    let icon = '';
+
+                    // İkon ekle (Temel Başlıklar için)
+                    if (headerText.includes("Motivasyon")) icon = '🌟';
+                    else if (headerText.includes("Korku")) icon = '😨';
+                    else if (headerText.includes("Çatışma Dinamikleri")) icon = '💥';
+                    else if (headerText.includes("Sağlıklı İletişim")) icon = '🤝';
+                    
+                    html += `<h5><span class="mr-2">${icon}</span> ${headerText}</h5>`;
+                    
+                    // Başlıktan sonra gelen metni ekle (varsa)
+                    if (content) {
+                        html += `<p class="mb-3 text-gray-700">${content.replace(/\n/g, '<br>')}</p>`;
+                    }
+                } 
+                // Alt Başlıklar/Çatışma Dinamikleri (Örn: **1'in Eleştirisi ve 9'un Ataleti:**)
+                else if (line.match(/^\*\*(.*?)\*\*$/)) {
+                    if (inList) { html += '</ul>'; inList = false; }
+                    const headerText = line.replace(/^\*\*(.*)\*\*$/, '$1').trim();
+                    
+                    let icon = conflictIcons[headerText] || strategyIcons[headerText] || '💡';
+
+                    html += `<div class="conflict-dynamic-block">
+                                <p class="dynamic-speaker text-base flex items-center mb-2">
+                                    <span class="text-xl mr-2">${icon}</span> ${headerText}:
+                                </p>
+                    `;
+                }
+                // Alt Başlık Kapatma (Pasif Direnç veya Ataleti Açıklayan Paragraflar için)
+                else if (line.match(/^[\*\-]\s/)) {
+                    // Maddelere bak (Örn: * Madde veya - Madde)
+                    if (!inList) { html += '<ul class="text-gray-700">'; inList = true; }
+                    const content = line.replace(/^[\*\-]\s/, '').trim();
+                    html += `<li>${content}</li>`;
+                }
+                // Düz metin (Çatışma bloklarının içindeki açıklamalar)
+                else {
+                    if (inList) { html += '</ul>'; inList = false; }
+                    
+                    // Eğer bir önceki blok bir conflict-dynamic-block ise, bu metin onun içeriğidir.
+                    if (html.endsWith('</p>')) {
+                        // Yeni bir paragraf aç, önceki conflict-dynamic-block'u kapat
+                        html += `</div><p class="mb-3 text-gray-700">${line.replace(/\n/g, '<br>')}</p>`;
+                    } else if (html.endsWith('</p>') || html.endsWith('</ul>')) {
+                        // Yeni bir paragraf aç, önceki conflict-dynamic-block'u kapat
+                        html += `</div><p class="mb-3 text-gray-700">${line.replace(/\n/g, '<br>')}</p>`;
+                    } else if (html.endsWith('</p>') || html.endsWith('</ul>') || html.endsWith('</div>')) {
+                        html += `<p class="mb-3 text-gray-700">${line.replace(/\n/g, '<br>')}</p>`;
+                    } else if (html.endsWith('</ul>')) {
+                        html += `</div><p class="mb-3 text-gray-700">${line.replace(/\n/g, '<br>')}</p>`;
+                    } else {
+                        // Normal paragraf metni
+                        html += `<p class="mb-3 text-gray-700">${line.replace(/\n/g, '<br>')}</p>`;
+                    }
+                }
+            });
+            
+            // Açık kalan liste veya dinamik bloğu kapat
+            if (inList) { html += '</ul>'; }
+            // En sondaki bloğun kapatıldığından emin ol
+            if (html.includes('<div class="conflict-dynamic-block">') && !html.endsWith('</div>')) {
+                 html += '</div>';
+            }
+            
+            return html;
+        }
+
+        // UTILITY: Yeni Senaryo JSON'unu HTML Diyalog Alanına Çevirir
+        function renderScenarioToHTML(scenarioData, senderType, receiverType) {
+            let fullScenarioText = "Senaryo Diyaloğu:\n";
+            let html = '';
+            
+            scenarioData.forEach(item => {
+                const speakerId = item.speaker_id;
+                const speakerData = ENNEAGRAM_TYPES.find(t => t.id == speakerId) || { name: 'Bilinmeyen', color: 'gray-700', icon: '❓' };
+                const isSender = senderType.id == speakerId;
+                
+                const bubbleClass = isSender ? 'speech-bubble-sender' : 'speech-bubble-receiver';
+                const textColor = speakerData.color;
+
+                fullScenarioText += `${item.speaker_type}: ${item.dialogue}\n`;
+
+                html += `
+                    <div class="speech-bubble ${bubbleClass}">
+                        <p class="font-bold text-lg flex items-center mb-1 text-${textColor}">
+                            <span class="text-2xl mr-2">${speakerData.icon}</span> ${item.speaker_type}:
+                        </p>
+                        <p class="text-gray-700">
+                            ${item.dialogue}
+                        </p>
+                    </div>
+                `;
+            });
+
+            // Diyalog metnini gizli bir alanda sakla
+            dialogueArea.innerHTML = html + `<textarea id="current-scenario-text" class="hidden">${fullScenarioText}</textarea>`;
+            
+            // Analiz/Çözüm butonlarını etkinleştir
+            solveButton.disabled = false;
+            analyzeButton.disabled = false;
+        }
+
+        // UTILITY: Çözüm JSON'unu Okunabilir HTML'e Çevirir (Diyalogları İçerecek Şekilde)
+        function renderSolutionToHTML(solutionData, senderType, receiverType) {
+            let html = '';
+            
+            // 1. Başlangıç Analizi
+            html += `
+                <h5 class="text-lg font-bold"><span class="mr-2">💡</span> İlk Analiz: Çatışmanın Özü</h5>
+                <p class="text-gray-700">${solutionData.initial_analysis}</p>
+            `;
+            
+            // 2. Yeni Diyalog Senaryosu (Konuşma Balonları ile)
+            html += `
+                <h5 class="text-lg font-bold"><span class="mr-2">💬</span> Uzlaşma Diyaloğu: "${solutionData.title}"</h5>
+                <div class="solution-dialogue-container space-y-3">
+            `;
+            
+            solutionData.dialogue_scenario.forEach(item => {
+                const speakerId = item.speaker_id;
+                const speakerData = ENNEAGRAM_TYPES.find(t => t.id == speakerId) || { name: 'Bilinmeyen', color: 'gray-700', icon: '❓' };
+                const isSender = senderType.id == speakerId;
+                
+                // Çözüm diyalogları için ana senaryo stilini kullanıyoruz
+                const bubbleClass = isSender ? 'speech-bubble-sender' : 'speech-bubble-receiver';
+                const textColor = speakerData.color;
+
+                html += `
+                    <div class="speech-bubble ${bubbleClass}">
+                        <p class="font-bold text-base flex items-center mb-1 text-${textColor}">
+                            <span class="text-xl mr-2">${speakerData.icon}</span> ${item.speaker_type}:
+                        </p>
+                        <p class="text-gray-700">
+                            ${item.dialogue}
+                        </p>
+                    </div>
+                `;
+            });
+
+            html += `</div>`; // .solution-dialogue-container kapatma
+
+            // 3. Neden İşe Yaradı Özeti
+            html += `
+                <h5 class="text-lg font-bold"><span class="mr-2">🏆</span> Neden İşe Yaradı?</h5>
+                <p class="text-gray-700">${solutionData.why_it_worked}</p>
+            `;
+            
+            return html;
+        }
+
+        // UI Güncelleme Fonksiyonu (Genel - Analiz/Çözüm Bölümü için)
+        function updateResultUI(isLoading, resultHTML = null, sources = []) {
+            generateScenarioButton.disabled = isLoading;
+            solveButton.disabled = isLoading;
+            analyzeButton.disabled = isLoading;
+            loadingSpinner.classList.toggle('hidden', !isLoading);
+            
+            if (isLoading) {
+                placeholderText.classList.add('hidden');
+                analysisContent.classList.add('hidden');
+                analysisContent.innerHTML = '';
+                return;
+            }
+
+            placeholderText.classList.toggle('hidden', !!resultHTML);
+            analysisContent.classList.toggle('hidden', !resultHTML);
+            
+            if (resultHTML) {
+                analysisContent.innerHTML = resultHTML;
+            } else {
+                 analysisContent.innerHTML = '';
+            }
+        }
+
+        // UI Güncelleme Fonksiyonu (Çeviri Bölümü için)
+        function updateTranslationUI(isLoading, resultText = null, error = false) {
+            translateButton.disabled = isLoading;
+            translationLoadingSpinner.classList.toggle('hidden', !isLoading);
+            translationErrorMessage.classList.toggle('hidden', !error);
+
+            if (isLoading) {
+                translationResultArea.classList.remove('hidden');
+                translationOutput.textContent = 'Çeviri yapılıyor...';
+                return;
+            }
+
+            if (error) {
+                 translationResultArea.classList.add('hidden');
+                 return;
+            }
+
+            if (resultText) {
+                translationOutput.textContent = resultText.trim();
+                translationResultArea.classList.remove('hidden');
+            } else {
+                translationResultArea.classList.add('hidden');
+            }
+        }
+
+
+        // Olay Dinleyicileri
+
+        // Dropdown değiştiğinde tip kartlarını güncelle
+        senderTypeSelect.addEventListener('change', updateTypeCards);
+        receiverTypeSelect.addEventListener('change', updateTypeCards);
+
+
+        // 1. İletişim Senaryosu Oluştur (LLM Feature 1)
+        generateScenarioButton.addEventListener('click', async () => {
+            const senderType = ENNEAGRAM_TYPES.find(t => t.id == senderTypeSelect.value);
+            const receiverType = ENNEAGRAM_TYPES.find(t => t.id == receiverTypeSelect.value);
+
+            // Giriş alanını temizle ve yükleniyor durumunu göster
+            dialogueArea.innerHTML = `<div class="flex justify-center items-center h-[150px]"><div class="spinner"></div><p class="ml-4 text-indigo-600">Senaryo oluşturuluyor...</p></div>`;
+            solveButton.disabled = true;
+            analyzeButton.disabled = true;
+            updateResultUI(false); // Önceki analiz sonuçlarını temizle
+
+            try {
+                const scenarioData = await createNewScenario(senderType, receiverType);
+                renderScenarioToHTML(scenarioData, senderType, receiverType);
+                
+            } catch (error) {
+                console.error("Yeni senaryo oluşturulamadı:", error);
+                dialogueArea.innerHTML = `<div class="p-4 bg-red-100 border border-red-400 rounded-lg text-red-700">
+                    <p class="font-bold">Senaryo Oluşturulamadı.</p>
+                    <p class="text-sm">Hata: Yapay zeka, JSON formatını doğru üretemedi veya bir ağ hatası oluştu. Lütfen konsolu kontrol edin.</p>
+                </div>`;
+            }
+        });
+
+
+        // 2. Alternatif Çözüm Önerisi (LLM Feature 2)
+        solveButton.addEventListener('click', async () => {
+            const scenarioTextElement = document.getElementById('current-scenario-text');
+            if (!scenarioTextElement) {
+                const errorBox = document.getElementById('result-area');
+                errorBox.innerHTML = '<p class="text-red-600 font-bold p-2">Lütfen önce bir senaryo oluşturun.</p>';
+                return;
+            }
+            const scenarioText = scenarioTextElement.value;
+            const senderType = ENNEAGRAM_TYPES.find(t => t.id == senderTypeSelect.value);
+            const receiverType = ENNEAGRAM_TYPES.find(t => t.id == receiverTypeSelect.value);
+
+            updateResultUI(true);
+            try {
+                const solutionData = await getAlternativeSolution(senderType, receiverType, scenarioText);
+                
+                const solutionContentHTML = renderSolutionToHTML(solutionData, senderType, receiverType);
+
+                const solutionHTML = createAnalysisBlockHTML(
+                    'Alternatif Çözüm Önerisi (Uzlaşma Planı)',
+                    solutionContentHTML,
+                    true // isSolution
+                );
+                updateResultUI(false, solutionHTML);
+            } catch (error) {
+                console.error("Çözüm önerisi alınamadı:", error);
+                updateResultUI(false, createAnalysisBlockHTML('Hata', '<p class="text-red-600">Alternatif çözüm önerisi alınırken bir sorun oluştu. Lütfen konsolu kontrol edin.</p>', true));
+            }
+        });
+
+        // 3. Derinlemesine Analiz (LLM Feature 3 - Grounding)
+        analyzeButton.addEventListener('click', async () => {
+            const senderType = ENNEAGRAM_TYPES.find(t => t.id == senderTypeSelect.value);
+            const receiverType = ENNEAGRAM_TYPES.find(t => t.id == receiverTypeSelect.value);
+
+            updateResultUI(true);
+            try {
+                const { text, sources } = await getDeepDiveAnalysis(senderType, receiverType);
+                
+                // Metni al ve daha okunabilir HTML formatına çevir (GÜNCELLENMİŞ FONKSİYON)
+                const readableHTML = renderAnalysisToHTML(text);
+                
+                const analysisHTML = createAnalysisBlockHTML(
+                    `Derinlemesine Analiz: Tip ${senderType.id} (${senderType.name}) ve Tip ${receiverType.id} (${receiverType.name}) Dinamikleri`,
+                    readableHTML,
+                    false, // isSolution
+                    sources,
+                    senderType.icon, // Tip 1 ikonu
+                    receiverType.icon // Tip 9 ikonu
+                );
+
+                updateResultUI(false, analysisHTML);
+            } catch (error) {
+                console.error("Derinlemesine analiz alınamadı:", error);
+                updateResultUI(false, createAnalysisBlockHTML('Hata', '<p class="text-red-600">Derinlemesine analiz alınırken bir sorun oluştu. Lütfen konsolu kontrol edin.</p>', false));
+            }
+        });
+        
+        // 4. Empatik Çeviri (LLM Feature 4)
+        translateButton.addEventListener('click', async () => {
+            const dialogueText = dialogueInput.value.trim();
+            if (!dialogueText) {
+                translationErrorMessage.textContent = "Lütfen çevrilecek bir diyalog metni girin.";
+                updateTranslationUI(false, null, true);
+                return;
+            }
+            
+            updateTranslationUI(true);
+            try {
+                const { text } = await getToneTranslation(dialogueText);
+                updateTranslationUI(false, text, false);
+            } catch (error) {
+                console.error("Empatik çeviri alınamadı:", error);
+                translationErrorMessage.textContent = "Hata: Empatik çeviri alınırken bir sorun oluştu.";
+                updateTranslationUI(false, null, true);
+            }
+        });
+        
+        // Başlangıçta dropdownları doldur ve kartları yükle
+        populateTypeSelects();
+        updateTypeCards();
+
+    </script>
+</body>
+</html>
