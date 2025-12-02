@@ -1,4 +1,4 @@
-name: Deploy static site to GitHub Pages (Fast, No File Moving)
+name: Deploy static site to GitHub Pages
 
 on:
   push:
