@@ -459,10 +459,7 @@
             let jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
             
             if (jsonText) {
-                // !!! HATA DÜZELTME BURADA YAPILDI !!!
                 // Regex literal (Örn: /```/) yerine new RegExp kullanarak tarayıcı ayrıştırma hataları önlendi.
-                // Eski hali: .replace(/```json\s*/g, '')
-                
                 const jsonFenceStart = new RegExp("```json\\s*", "g");
                 const jsonFenceEnd = new RegExp("\\s*```", "g");
                 
@@ -647,7 +644,8 @@
                 "1'in Eleştirisi ve 9'un Ataleti": "⚖️ ↔️ 🕊️",
                 "9'un Geri Çekilmesi ve Pasif Direnç": "🕊️ ❌ ⚖️",
                 "Öfke Döngüsü": "🔄",
-                "İhmal Edilen Öfke": "🤫"
+                "İhmal Edilen Öfke": "🤫",
+                "Bastırılmış Öfkenin Patlaması": "💥" 
             };
             
             const strategyIcons = {
@@ -655,17 +653,25 @@
                 "Tip 9 İçin Stratejiler": "✅ 🕊️"
             };
 
+            // Markdown parser helper for inline text (bold, italic)
+            const parseMarkdown = (text) => {
+                return text
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>');
+            };
+
             lines.forEach(line => {
                 line = line.trim();
                 if (line.length === 0) return;
                 
-                // Başlık/Bölüm Başlıkları
-                if (line.match(/^\*\*(.*?)\*\*:(.*)$/)) {
+                // Başlık/Bölüm Başlıkları (Hem **Başlık**: İçerik hem de **Başlık:** İçerik formatını destekler)
+                const headerMatch = line.match(/^\*\*(.*?)\*\*:\s*(.*)$/) || line.match(/^\*\*(.*?):\*\*\s*(.*)$/);
+
+                if (headerMatch) {
                     if (inList) { html += '</ul>'; inList = false; }
                     
-                    const match = line.match(/^\*\*(.*?)\*\*:(.*)$/);
-                    const headerText = match[1].trim();
-                    const content = match[2].trim();
+                    const headerText = headerMatch[1].trim();
+                    const content = headerMatch[2].trim();
                     let icon = '';
 
                     if (headerText.includes("Motivasyon")) icon = '🌟';
@@ -676,10 +682,10 @@
                     html += `<h5><span class="mr-2">${icon}</span> ${headerText}</h5>`;
                     
                     if (content) {
-                        html += `<p class="mb-3 text-gray-700">${content.replace(/\n/g, '<br>')}</p>`;
+                        html += `<p class="mb-3 text-gray-700">${parseMarkdown(content).replace(/\n/g, '<br>')}</p>`;
                     }
                 } 
-                // Alt Başlıklar/Çatışma Dinamikleri
+                // Alt Başlıklar/Çatışma Dinamikleri (Sadece **Başlık**)
                 else if (line.match(/^\*\*(.*?)\*\*$/)) {
                     if (inList) { html += '</ul>'; inList = false; }
                     const headerText = line.replace(/^\*\*(.*)\*\*$/, '$1').trim();
@@ -697,22 +703,23 @@
                     if (!inList) { html += '<ul class="text-gray-700">'; inList = true; }
                     // Safe regex replacement
                     const content = line.replace(/^[\*\-]\s/, '').trim();
-                    html += `<li>${content}</li>`;
+                    html += `<li>${parseMarkdown(content)}</li>`;
                 }
-                // Düz metin
+                // Düz metin (Paragraf)
                 else {
                     if (inList) { html += '</ul>'; inList = false; }
                     
+                    // Önceki bloğu kapatma kontrolü
                     if (html.endsWith('</p>')) {
-                        html += `</div><p class="mb-3 text-gray-700">${line.replace(/\n/g, '<br>')}</p>`;
+                        html += `</div><p class="mb-3 text-gray-700">${parseMarkdown(line).replace(/\n/g, '<br>')}</p>`;
                     } else if (html.endsWith('</p>') || html.endsWith('</ul>')) {
-                        html += `</div><p class="mb-3 text-gray-700">${line.replace(/\n/g, '<br>')}</p>`;
+                        html += `</div><p class="mb-3 text-gray-700">${parseMarkdown(line).replace(/\n/g, '<br>')}</p>`;
                     } else if (html.endsWith('</p>') || html.endsWith('</ul>') || html.endsWith('</div>')) {
-                        html += `<p class="mb-3 text-gray-700">${line.replace(/\n/g, '<br>')}</p>`;
+                        html += `<p class="mb-3 text-gray-700">${parseMarkdown(line).replace(/\n/g, '<br>')}</p>`;
                     } else if (html.endsWith('</ul>')) {
-                        html += `</div><p class="mb-3 text-gray-700">${line.replace(/\n/g, '<br>')}</p>`;
+                        html += `</div><p class="mb-3 text-gray-700">${parseMarkdown(line).replace(/\n/g, '<br>')}</p>`;
                     } else {
-                        html += `<p class="mb-3 text-gray-700">${line.replace(/\n/g, '<br>')}</p>`;
+                        html += `<p class="mb-3 text-gray-700">${parseMarkdown(line).replace(/\n/g, '<br>')}</p>`;
                     }
                 }
             });
