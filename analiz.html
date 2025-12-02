@@ -278,7 +278,6 @@
     <!-- Firebase ve Gemini API İSTEMCİ KODU -->
     <script type="module">
         // Firebase Modülleri
-        // SDK sürümü 12.6.0 olarak güncellendi.
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
         import { 
             getAuth, 
@@ -286,10 +285,8 @@
             signInWithEmailAndPassword,
             signOut,
             onAuthStateChanged
-            // Diğer Firebase Auth modülleri 12.6.0 sürümüne göre çağrılacak
         } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
-        // Firestore ve diğer modüller için en son sürüm kullanıldı
-        import { getFirestore, setLogLevel } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+        import { getFirestore, setLogLevel, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js";
 
 
@@ -330,15 +327,10 @@
         // Sabitler
         const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
         
-        // **ÇÖZÜM**: GitHub Pages ve Yerel/Canvas için dinamik/otomatik uyumluluk sağlamak amacıyla yer tutucuyu geri getiriyoruz.
-        // Canvas'ta test ederken, bu satırı manuel olarak const API_KEY = ""; şeklinde değiştirin.
-        // VEYA: Aşağıdaki kodda, canvas için boş, GH Pages için yer tutucu kullanacağız.
-        
+        // Gemini API Anahtarı: 
+        // GitHub Pages için: "!!API_KEY_PLACEHOLDER!!" (Actions tarafından değiştirilecek)
+        // Canvas/Lokal için: "" (Boş dize, Canvas tarafından otomatik doldurulacak)
         const isCanvasEnvironment = typeof __app_id !== 'undefined';
-        
-        // Gemini API Anahtarı:
-        // Canvas'ta çalışıyorsa, Canvas tarafından otomatik enjeksiyon için boş dize bırakılır.
-        // Aksi takdirde (GitHub Pages), yer tutucu kullanılır.
         const API_KEY = isCanvasEnvironment ? "" : "!!API_KEY_PLACEHOLDER!!";
         
         // Enneagram Tipleri Verisi (Değiştirilmedi)
@@ -355,10 +347,10 @@
         ];
         
         // ----------------------------------------------------------------------
-        // GÜNCELLENMİŞ FIREBASE BAŞLANGIÇ AYARLARI (GitHub Pages için Sabitlendi)
+        // FIREBASE BAŞLANGIÇ AYARLARI
         // ----------------------------------------------------------------------
         
-        // Sizin sağladığınız Firebase yapılandırması
+        // GitHub Pages/Lokal Dağıtımı İçin Sabit Konfigürasyon
         const firebaseConfig = {
             apiKey: "AIzaSyCFmxO6vFQIg7QcQMhflFYqD7EcT-H0nKI",
             authDomain: "enneagram-iletisim.firebaseapp.com",
@@ -369,10 +361,6 @@
             measurementId: "G-123ZGJSPBJ"
         };
         
-        // Canvas'tan gelen global değişkenler (GitHub Pages'ta null/tanımsızdır, bu kod onları yoksayar)
-        // const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        // const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
         let auth, db;
         let isAuthReady = false;
 
@@ -384,17 +372,53 @@
             getAnalytics(app); // Analytics de başlatıldı
             setLogLevel('Debug');
             
-            // Canvas/Anonim oturum açma mantığı, manuel giriş/kayıt kullanıldığı için kaldırıldı.
-            // Sadece onAuthStateChanged dinleniyor.
 
             // Kimlik doğrulama durumu değiştiğinde görünümü kontrol et
-            onAuthStateChanged(auth, (user) => {
+            onAuthStateChanged(auth, async (user) => {
                 isAuthReady = true;
                 if (user) {
-                    loginView.style.display = 'none';
-                    mainAppView.style.display = 'block';
-                    typeCardsSection.style.display = 'block';
-                    console.log("Kullanıcı oturum açtı:", user.uid);
+                    try {
+                        // Kullanıcının onay durumunu kontrol et
+                        const userDocRef = doc(db, "users", user.uid);
+                        const userDoc = await getDoc(userDocRef);
+                        
+                        if (userDoc.exists()) {
+                            // Belge var, onay durumunu kontrol et
+                            if (userDoc.data().approved === true) {
+                                // ONAYLANDI: Ana içeriği göster
+                                loginView.style.display = 'none';
+                                mainAppView.style.display = 'block';
+                                typeCardsSection.style.display = 'block';
+                                authErrorMessage.classList.add('hidden');
+                                console.log("Kullanıcı oturum açtı ve onaylandı:", user.uid);
+                            } else {
+                                // ONAY BEKLİYOR: Hata mesajını göster ve çıkış yap
+                                showAuthError("Hesabınız yönetici onayı bekliyor. Lütfen onaylanana kadar bekleyiniz.");
+                                await signOut(auth); 
+                                
+                                loginView.style.display = 'block';
+                                mainAppView.style.display = 'none';
+                                typeCardsSection.style.display = 'none';
+                            }
+                        } else {
+                            // Belge yok (Olası Hata: Kayıt tamamlanmamış veya kural hatası)
+                            showAuthError("Kullanıcı kaydı tamamlanmamış veya veritabanı erişiminde hata var. Lütfen tekrar kayıt olmayı deneyin.");
+                            await signOut(auth); 
+                            
+                            loginView.style.display = 'block';
+                            mainAppView.style.display = 'none';
+                            typeCardsSection.style.display = 'none';
+                        }
+                    } catch (firestoreError) {
+                        // Firestore'dan okuma sırasında KURAL HATASI veya AĞ HATASI oluştu
+                        console.error("Firestore Belge Okuma Hatası:", firestoreError);
+                        showAuthError("Güvenlik Kuralları veya ağ hatası nedeniyle hesabınızın durumu kontrol edilemiyor. Konsolu kontrol edin.");
+                        await signOut(auth);
+                        
+                        loginView.style.display = 'block';
+                        mainAppView.style.display = 'none';
+                        typeCardsSection.style.display = 'none';
+                    }
                 } else {
                     loginView.style.display = 'block';
                     mainAppView.style.display = 'none';
@@ -433,8 +457,8 @@
             loginButton.disabled = true;
             signupButton.disabled = true;
             try {
+                // Giriş yapılıyor. Onay kontrolü onAuthStateChanged içinde yapılacak.
                 await signInWithEmailAndPassword(auth, email, password);
-                // Başarılı olursa onAuthStateChanged tetiklenecek ve görünüm değişecek
             } catch (error) {
                 console.error("Giriş Hatası:", error);
                 let message = "Giriş başarısız. Bilgilerinizi kontrol edin.";
@@ -448,6 +472,7 @@
             }
         });
 
+        // **DÜZENLEME**: Kayıt işlemine Firestore'a kullanıcı durumunu kaydetme eklendi.
         signupButton.addEventListener('click', async () => {
             const email = loginEmailInput.value;
             const password = loginPasswordInput.value;
@@ -458,8 +483,23 @@
             loginButton.disabled = true;
             signupButton.disabled = true;
             try {
-                await createUserWithEmailAndPassword(auth, email, password);
-                // Başarılı olursa onAuthStateChanged tetiklenecek ve otomatik giriş yapılacak
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // 1. Kullanıcıyı Firestore'a Kaydet (Onaylanmamış olarak)
+                const userDocRef = doc(db, "users", user.uid);
+                await setDoc(userDocRef, {
+                    email: user.email,
+                    approved: false, // ONAY GEREKLİ
+                    createdAt: new Date().toISOString()
+                });
+                
+                // 2. Kullanıcıyı Oturumu Kapatmaya Zorla
+                await signOut(auth);
+
+                // Başarılı kayıt mesajı
+                showAuthError("Kayıt başarılı! Lütfen yönetici onayını bekleyin.");
+
             } catch (error) {
                 console.error("Kayıt Hatası:", error);
                 let message = "Kayıt başarısız oldu.";
@@ -557,8 +597,6 @@
 
             for (let i = 0; i < maxRetries; i++) {
                 try {
-                    // API_KEY yer tutucu olsa bile Canvas, boş string beklediği için
-                    // bu kontrolü devre dışı bıraktık. GitHub Pages için ise yer tutucu burada değiştirilecektir.
                     const finalPayload = {
                         ...payload,
                         tools: useSearch ? [{ "google_search": {} }] : undefined
@@ -613,8 +651,6 @@
         async function callGeminiJsonApi(payload, schema) {
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${API_KEY}`;
             
-            // API_KEY kontrolü kaldırıldı. API çağrısının kendisi hata verecektir.
-
             const finalPayload = {
                 ...payload,
                 generationConfig: {
