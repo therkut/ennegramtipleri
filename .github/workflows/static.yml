@@ -1,28 +1,27 @@
-# Simple workflow for deploying static content to GitHub Pages
+# GitHub Pages'a statik içerik dağıtımı için basit iş akışı
 name: Deploy static content to Pages
 
 on:
-  # Runs on pushes targeting the default branch
+  # Varsayılan dalı hedefleyen push işlemlerinde çalışır
   push:
     branches: ["main"]
 
-  # Allows you to run this workflow manually from the Actions tab
+  # Actions sekmesinden bu iş akışını manuel olarak çalıştırmanıza olanak tanır
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+# GitHub TOKEN izinlerini ayarlar, dağıtım için gereklidir
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+# Yalnızca tek bir eşzamanlı dağıtıma izin verir
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  # Single deploy job since we're just deploying
+  # Dağıtım işi
   deploy:
     environment:
       name: github-pages
@@ -31,13 +30,35 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      # ----------------------------------------------------------------------------------
+      # ÖNEMLİ ADIM: API Anahtarını JavaScript Koduna Enjekte Etme
+      # ----------------------------------------------------------------------------------
+      # Bu adım, index.html dosyasındaki "!!API_KEY_PLACEHOLDER!!" yer tutucusunu 
+      # GitHub Secret'ınız olan GEMINI_API_KEY değeriyle değiştirir.
+      - name: Inject API Key into JavaScript
+        run: |
+          # API key'in bulunduğu HTML dosyasının adını belirtin
+          HTML_FILE="index.html" 
+          
+          # sed komutu ile yer tutucuyu, GitHub Secret değeriyle değiştir
+          # Not: 's|...|...|g' formatı, anahtar içinde / veya & gibi karakterler olsa bile güvenli değiştirme sağlar.
+          sed -i 's|!!API_KEY_PLACEHOLDER!!|${{ secrets.GEMINI_API_KEY }}|g' $HTML_FILE
+          
+        env:
+          # Secret'ı bu adıma ortam değişkeni olarak geçiriyoruz (gerekli)
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} 
+      # ----------------------------------------------------------------------------------
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
+        
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
-          path: '.'
+          # İçine API key enjekte edilmiş tüm depoyu yükle
+          path: '.' 
+          
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
