@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enneagram Tipleri - Detaylı İnfografik</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter ve Open Sans fontları -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Open+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Font Awesome İkonları -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #f3f4f6;
+        }
+        h1, h2, h3, .type-number, strong {
+            font-family: 'Inter', sans-serif;
+        }
+        .card {
+            transition: all 0.3s ease;
+            display: flex; /* Flexbox'ı kullanarak içerik sığdırmayı kolaylaştırır */
+            flex-direction: column;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        /* Detaylı metin bloğu için özel stil */
+        .detail-list li {
+            margin-bottom: 4px;
+        }
+
+        /* Renkler (Kullanıcının verdiği özel renkler) */
+        .border-t-type-1 { border-top-color: #cbd5e1; } /* Grey/Blue */
+        .border-t-type-2 { border-top-color: #fca5a5; } /* Red/Pink */
+        .border-t-type-3 { border-top-color: #fcd34d; } /* Yellow/Gold */
+        .border-t-type-4 { border-top-color: #d8b4fe; } /* Purple */
+        .border-t-type-5 { border-top-color: #67e8f9; } /* Cyan/Blue */
+        .border-t-type-6 { border-top-color: #d6d3d1; } /* Beige/Brown */
+        .border-t-type-7 { border-top-color: #86efac; } /* Green/Lime */
+        .border-t-type-8 { border-top-color: #ef4444; } /* Red/Strong */
+        .border-t-type-9 { border-top-color: #a7f3d0; } /* Soft Green */
+
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-4 md:p-8">
+
+    <!-- Header -->
+    <header class="text-center mb-10">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 tracking-tight mb-2">ENNEAGRAM TİPLERİ</h1>
+        <p class="text-gray-500 text-lg">9 Farklı Kişilik Modeli ve Gelişim Yolculuğu</p>
+        <div class="mt-6 max-w-lg mx-auto">
+            
+        </div>
+    </header>
+
+    <!-- Main Grid - 3x3 Layout -->
+    <main class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- TYPE 1: REFORMCU (Mükemmeliyetçi) -->
+        <div class="card bg-white rounded-xl shadow-lg overflow-hidden border-t-8 border-t-type-1">
+            <div class="p-6 flex-grow">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span class="text-5xl font-black text-slate-200 absolute opacity-20 -ml-2 -mt-2 type-number">1</span>
+                        <h2 class="text-xl font-bold text-slate-700 relative z-10">REFORMCU</h2>
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Mükemmeliyetçi</span>
+                    </div>
+                    <i class="fa-solid fa-scale-balanced text-3xl text-slate-400"></i>
+                </div>
+                
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-md font-medium">Kararlı</span>
+                    <span class="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-md font-medium">Dürüst</span>
+                    <span class="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-md font-medium">Disiplinli</span>
+                </div>
+
+                <div class="space-y-3 text-sm text-gray-700">
+                    <p class="text-xs italic p-2 bg-slate-50 rounded-lg border border-slate-200">
+                        <strong class="text-slate-700">Nasıl Tanırım:</strong> Tertipli, dakik, kurallara uyan, detaylara takılan ve düzeltme ihtiyacı hisseder.
+                    </p>
+
+                    <ul class="detail-list space-y-1">
+                        <li><strong class="text-slate-800">Temel Arzusu:</strong> Bütünlük içinde ve doğru olmak.</li>
+                        <li><strong class="text-slate-800">Temel Korkusu:</strong> Kusurlu, kötü veya yanlış olmak.</li>
+                        <li><strong class="text-slate-800">Temel Sorunu:</strong> Öfke (Bastırılmış).</li>
+                    </ul>
+                    <hr class="border-slate-100"/>
+                    <div class="text-xs space-y-1">
+                        <p><strong>Stres (4'e Gider):</strong> İçe kapanır, melankolikleşir ve "kimse beni anlamıyor" moduna girer.</p>
+                        <p><strong>Gelişim (7'ye Gider):</strong> Daha spontane, neşeli olur ve hayatın tadını çıkarır.</p>
+                    </div>
+                    <hr class="border-slate-100"/>
+                    <p class="text-xs"><strong class="text-slate-800">İletişim:</strong> Dürüst ol, sorumluluklarını yerine getir, hatalarını kabul et ve lafı dolandırma.</p>
+                    <p class="text-xs"><strong class="text-slate-800">Ünlüler:</strong> Platon, Gandhi, Hilary Clinton.</p>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-3 border-t border-slate-100 flex justify-between text-xs font-semibold">
+                <div class="flex items-center gap-1 text-red-500">
+                    <i class="fa-solid fa-arrow-up-right-from-square transform rotate-45"></i>
+                    <span>Stres Yönü: Tip 4</span>
+                </div>
+                <div class="flex items-center gap-1 text-green-600">
+                    <i class="fa-solid fa-arrow-up-right-from-square transform -rotate-45"></i>
+                    <span>Gelişim Yönü: Tip 7</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TYPE 2: YARDIMSEVER (Verici) -->
+        <div class="card bg-white rounded-xl shadow-lg overflow-hidden border-t-8 border-t-type-2">
+            <div class="p-6 flex-grow">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span class="text-5xl font-black text-rose-200 absolute opacity-20 -ml-2 -mt-2 type-number">2</span>
+                        <h2 class="text-xl font-bold text-rose-600 relative z-10">YARDIMSEVER</h2>
+                        <span class="text-xs font-semibold text-rose-400 uppercase tracking-wide">Verici</span>
+                    </div>
+                    <i class="fa-solid fa-heart text-3xl text-rose-300"></i>
+                </div>
+                
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-2 py-1 bg-rose-50 text-rose-600 text-xs rounded-md font-medium">Cömert</span>
+                    <span class="px-2 py-1 bg-rose-50 text-rose-600 text-xs rounded-md font-medium">Şefkatli</span>
+                    <span class="px-2 py-1 bg-rose-50 text-rose-600 text-xs rounded-md font-medium">Fedakar</span>
+                </div>
+
+                <div class="space-y-3 text-sm text-gray-700">
+                    <p class="text-xs italic p-2 bg-rose-50 rounded-lg border border-rose-200">
+                        <strong class="text-rose-700">Nasıl Tanırım:</strong> Sıcakkanlı, sürekli "bir isteğin var mı?" diye soran, ilişki odaklı ve güler yüzlüdür.
+                    </p>
+                    <ul class="detail-list space-y-1">
+                        <li><strong class="text-rose-800">Temel Arzusu:</strong> Sevilmek.</li>
+                        <li><strong class="text-rose-800">Temel Korkusu:</strong> Sevilmemek veya istenmemek.</li>
+                        <li><strong class="text-rose-800">Temel Sorunu:</strong> Gurur (Kendi ihtiyaçlarını yok sayıp yardım etme gururu).</li>
+                    </ul>
+                    <hr class="border-rose-100"/>
+                    <div class="text-xs space-y-1">
+                        <p><strong>Stres (8'e Gider):</strong> Öfkeli, suçlayıcı ve talepkar olur.</p>
+                        <p><strong>Gelişim (4'e Gider):</strong> Kendi duygularına odaklanır, kendini tanır ve "hayır" diyebilir.</p>
+                    </div>
+                    <hr class="border-rose-100"/>
+                    <p class="text-xs"><strong class="text-rose-800">İletişim:</strong> Takdir et, özel olduğunu hissettir, nazik ol ve eleştirirken yumuşak bir dil kullan.</p>
+                    <p class="text-xs"><strong class="text-rose-800">Ünlüler:</strong> Rahibe Teresa, Celine Dion, Dolly Parton.</p>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-3 border-t border-slate-100 flex justify-between text-xs font-semibold">
+                <div class="flex items-center gap-1 text-red-500">
+                    <i class="fa-solid fa-arrow-up-right-from-square transform rotate-45"></i>
+                    <span>Stres Yönü: Tip 8</span>
+                </div>
+                <div class="flex items-center gap-1 text-green-600">
+                    <i class="fa-solid fa-arrow-up-right-from-square transform -rotate-45"></i>
+                    <span>Gelişim Yönü: Tip 4</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TYPE 3: BAŞARICI (Motive Edici) -->
+        <div class="card bg-white rounded-xl shadow-lg overflow-hidden border-t-8 border-t-type-3">
+            <div class="p-6 flex-grow">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span class="text-5xl font-black text-amber-200 absolute opacity-20 -ml-2 -mt-2 type-number">3</span>
+                        <h2 class="text-xl font-bold text-amber-600 relative z-10">BAŞARICI</h2>
+                        <span class="text-xs font-semibold text-amber-500 uppercase tracking-wide">Motive Edici</span>
+                    </div>
+                    <i class="fa-solid fa-trophy text-3xl text-amber-300"></i>
+                </div>
+                
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-2 py-1 bg-amber-50 text-amber-600 text-xs rounded-md font-medium">Özgüvenli</span>
+                    <span class="px-2 py-1 bg-amber-50 text-amber-600 text-xs rounded-md font-medium">Hırslı</span>
+                    <span class="px-2 py-1 bg-amber-50 text-amber-600 text-xs rounded-md font-medium">Uyumlu</span>
+                </div>
+
+                <div class="space-y-3 text-sm text-gray-700">
+                    <p class="text-xs italic p-2 bg-amber-50 rounded-lg border border-amber-200">
+                        <strong class="text-amber-700">Nasıl Tanırım:</strong> Enerjik, sürekli meşgul, imajına önem veren, rekabetçi ve sonuç odaklıdır.
+                    </p>
+                    <ul class="detail-list space-y-1">
+                        <li><strong class="text-amber-800">Temel Arzusu:</strong> Değerli ve takdir edilir hissetmek.</li>
+                        <li><strong class="text-amber-800">Temel Korkusu:</strong> Başarısızlık ve değersizlik.</li>
+                        <li><strong class="text-amber-800">Temel Sorunu:</strong> Aldatma (Kendi duygularını maskeleyip sadece başarıyı yansıtma).</li>
+                    </ul>
+                    <hr class="border-amber-100"/>
+                    <div class="text-xs space-y-1">
+                        <p><strong>Stres (9'a Gider):</strong> Uyuşuklaşır, motivasyonunu kaybeder ve boşvermişlik başlar.</p>
+                        <p><strong>Gelişim (6'ya Gider):</strong> Takım oyuncusu olur, sadakat geliştirir ve kaygılarını paylaşır.</p>
+                    </div>
+                    <hr class="border-amber-100"/>
+                    <p class="text-xs"><strong class="text-amber-800">İletişim:</strong> Sonuç odaklı konuş, zamanını çalma, başarılarını öv ama yapmacık olma.</p>
+                    <p class="text-xs"><strong class="text-amber-800">Ünlüler:</strong> Tom Cruise, Oprah Winfrey, Taylor Swift.</p>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-3 border-t border-slate-100 flex justify-between text-xs font-semibold">
+                <div class="flex items-center gap-1 text-red-500">
+                    <i class="fa-solid fa-arrow-up-right-from-square transform rotate-45"></i>
+                    <span>Stres Yönü: Tip 9</span>
+                </div>
+                <div class="flex items-center gap-1 text-green-600">
+                    <i class="fa-solid fa-arrow-up-right-from-square transform -rotate-45"></i>
+                    <span>Gelişim Yönü: Tip 6</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TYPE 4: BİREYSEL (Özgün) -->
+        <div class="card bg-white rounded-xl shadow-lg overflow-hidden border-t-8 border-t-type-4">
+            <div class="p-6 flex-grow">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span class="text-5xl font-black text-purple-200 absolute opacity-20 -ml-2 -mt-2 type-number">4</span>
+                        <h2 class="text-xl font-bold text-purple-700 relative z-10">BİREYSEL</h2>
+                        <span class="text-xs font-semibold text-purple-500 uppercase tracking-wide">Özgün</span>
+                    </div>
+                    <i class="fa-solid fa-palette text-3xl text-purple-300"></i>
+                </div>
+                
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-2 py-1 bg-purple-50 text-purple-600 text-xs rounded-md font-medium">Yaratıcı</span>
+                    <span class="px-2 py-1 bg-purple-50 text-purple-600 text-xs rounded-md font-medium">Duyarlı</span>
+                    <span class="px-2 py-1 bg-purple-50 text-purple-600 text-xs rounded-md font-medium">İçe Dönük</span>
+                </div>
+
+                <div class="space-y-3 text-sm text-gray-700">
+                    <p class="text-xs italic p-2 bg-purple-50 rounded-lg border border-purple-200">
+                        <strong class="text-purple-700">Nasıl Tanırım:</strong> Farklı giyim tarzı, derin bakışlar, melankolik hava ve "ben diğerleri gibi değilim" tavırlıdır.
+                    </p>
+                    <ul class="detail-list space-y-1">
+                        <li><strong class="text-purple-800">Temel Arzusu:</strong> Kendisi olmak (Özgünlük).</li>
+                        <li><strong class="text-purple-800">Temel Korkusu:</strong> Kimliksiz veya sıradan olmak.</li>
+                        <li><strong class="text-purple-800">Temel Sorunu:</strong> Kıskançlık (Başkalarındaki mutluluğun kendisinde eksik olduğunu düşünme).</li>
+                    </ul>
+                    <hr class="border-purple-100"/>
+                    <div class="text-xs space-y-1">
+                        <p><strong>Stres (2'ye Gider):</strong> Aşırı ilgi bekler, yapışkanlaşır ve duygusal manipülasyon yapar.</p>
+                        <p><strong>Gelişim (1'e Gider):</strong> Duygularını eyleme döker, disiplinli ve düzenli olur.</p>
+                    </div>
+                    <hr class="border-purple-100"/>
+                    <p class="text-xs"><strong class="text-purple-800">İletişim:</strong> Duygularını küçümseme, onu dinle, otantik ol ve zorla neşelendirmeye çalışma.</p>
+                    <p class="text-xs"><strong class="text-purple-800">Ünlüler:</strong> Frida Kahlo, Johnny Depp, Kurt Cobain.</p>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-3 border-t border-slate-100 flex justify-between text-xs font-semibold">
+                <div class="flex items-center gap-1 text-red-500">
+                    <i class="fa-solid fa-arrow-up-right-from-square transform rotate-45"></i>
+                    <span>Stres Yönü: Tip 2</span>
+                </div>
+                <div class="flex items-center gap-1 text-green-600">
+                    <i class="fa-solid fa-arrow-up-right-from-square transform -rotate-45"></i>
+                    <span>Gelişim Yönü: Tip 1</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TYPE 5: ARAŞTIRMACI (Gözlemci) -->
+        <div class="card bg-white rounded-xl shadow-lg overflow-hidden border-t-8 border-t-type-5">
+            <div class="p-6 flex-grow">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span class="text-5xl font-black text-cyan-200 absolute opacity-20 -ml-2 -mt-2 type-number">5</span>
+                        <h2 class="text-xl font-bold text-cyan-700 relative z-10">ARAŞTIRMACI</h2>
+                        <span class="text-xs font-semibold text-cyan-600 uppercase tracking-wide">Gözlemci</span>
+                    </div>
+                    <i class="fa-solid fa-glasses text-3xl text-cyan-300"></i>
+                </div>
+                
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-2 py-1 bg-cyan-50 text-cyan-700 text-xs rounded-md font-medium">Analitik</span>
+                    <span class="px-2 py-1 bg-cyan-50 text-cyan-700 text-xs rounded-md font-medium">Meraklı</span>
+                    <span class="px-2 py-1 bg-cyan-50 text-cyan-700 text-xs rounded-md font-medium">Bağımsız</span>
+                </div>
+
+                <div class="space-y-3 text-sm text-gray-700">
+                    <p class="text-xs italic p-2 bg-cyan-50 rounded-lg border border-cyan-200">
+                        <strong class="text-cyan-700">Nasıl Tanırım:</strong> Sessiz, çok okuyan, duygularını pek belli etmeyen, yalnızlığı seven ve "neden?" diye sorar.
+                    </p>
+                    <ul class="detail-list space-y-1">
+                        <li><strong class="text-cyan-800">Temel Arzusu:</strong> Yetenekli ve yeterli olmak.</li>
+                        <li><strong class="text-cyan-800">Temel Korkusu:</strong> İşe yaramaz, aciz veya bilgisiz olmak.</li>
+                        <li><strong class="text-cyan-800">Temel Sorunu:</strong> Tamahkarlık (Zamanını ve enerjisini paylaşmak istememe).</li>
+                    </ul>
+                    <hr class="border-cyan-100"/>
+                    <div class="text-xs space-y-1">
+                        <p><strong>Stres (7'ye Gider):</strong> Odaklanamaz, dağınıklaşır ve yüzeysel zevklere kaçar.</p>
+                        <p><strong>Gelişim (8'e Gider):</strong> Bilgisini eyleme döker, kendine güvenir ve inisiyatif alır.</p>
+                    </div>
+                    <hr class="border-cyan-100"/>
+                    <p class="text-xs"><strong class="text-cyan-800">İletişim:</strong> Mantıklı ol, duygusal baskı yapma, düşünmesi için ona alan ve zaman tanı.</p>
+                    <p class="text-xs"><strong class="text-cyan-800">Ünlüler:</strong> Albert Einstein, Bill Gates, Mark Zuckerberg.</p>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-3 border-t border-slate-100 flex justify-between text-xs font-semibold">
+                <div class="flex items-center gap-1 text-red-500">
+                    <i class="fa-solid fa-arrow-up-right-from-square transform rotate-45"></i>
+                    <span>Stres Yönü: Tip 7</span>
+                </div>
+                <div class="flex items-center gap-1 text-green-600">
+                    <i class="fa-solid fa-arrow-up-right-from-square transform -rotate-45"></i>
+                    <span>Gelişim Yönü: Tip 8</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TYPE 6: SORGULAYICI (Sadık) -->
+        <div class="card bg-white rounded-xl shadow-lg overflow-hidden border-t-8 border-t-type-6">
+            <div class="p-6 flex-grow">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span class="text-5xl font-black text-stone-200 absolute opacity-20 -ml-2 -mt-2 type-number">6</span>
+                        <h2 class="text-xl font-bold text-stone-700 relative z-10">SORGULAYICI</h2>
+                        <span class="text-xs font-semibold text-stone-500 uppercase tracking-wide">Sadık</span>
+                    </div>
+                    <i class="fa-solid fa-shield-halved text-3xl text-stone-300"></i>
+                </div>
+                
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-2 py-1 bg-stone-100 text-stone-600 text-xs rounded-md font-medium">Sorumlu</span>
+                    <span class="px-2 py-1 bg-stone-100 text-stone-600 text-xs rounded-md font-medium">Güvenilir</span>
+                    <span class="px-2 py-1 bg-stone-100 text-stone-600 text-xs rounded-md font-medium">Temkinli</span>
+                </div>
+
+                <div class="space-y-3 text-sm text-gray-700">
+                    <p class="text-xs italic p-2 bg-stone-50 rounded-lg border border-stone-200">
+                        <strong class="text-stone-700">Nasıl Tanırım:</strong> Tedbirli, sürekli "ya şöyle olursa?" diyen, güven arayan ve grubuna sadıktır.
+                    </p>
+                    <ul class="detail-list space-y-1">
+                        <li><strong class="text-stone-800">Temel Arzusu:</strong> Güvenlik ve destek.</li>
+                        <li><strong class="text-stone-800">Temel Korkusu:</strong> Desteği kaybetmek ve tehlikede olmak.</li>
+                        <li><strong class="text-stone-800">Temel Sorunu:</strong> Korku/Kaygı.</li>
+                    </ul>
+                    <hr class="border-stone-100"/>
+                    <div class="text-xs space-y-1">
+                        <p><strong>Stres (3'e Gider):</strong> Rekabetçi olur, işkolikleşir ve imaj kaygısına düşer.</p>
+                        <p><strong>Gelişim (9'a Gider):</strong> Zihnini susturur, rahatlar ve olaylara daha geniş açıdan bakar.</p>
+                    </div>
+                    <hr class="border-stone-100"/>
+                    <p class="text-xs"><strong class="text-stone-800">İletişim:</strong> Tutarlı ol, sürpriz yapma, dürüst ol ve güven ver.</p>
+                    <p class="text-xs"><strong class="text-stone-800">Ünlüler:</strong> Tom Hanks, Prens Harry, Marilyn Monroe.</p>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-3 border-t border-slate-100 flex justify-between text-xs font-semibold">
+                <div class="flex items-center gap-1 text-red-500">
+                    <i class="fa-solid fa-arrow-up-right-from-square transform rotate-45"></i>
+                    <span>Stres Yönü: Tip 3</span>
+                </div>
+                <div class="flex items-center gap-1 text-green-600">
+                    <i class="fa-solid fa-arrow-up-right-from-square transform -rotate-45"></i>
+                    <span>Gelişim Yönü: Tip 9</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TYPE 7: İSTEKLİ (Maceracı) -->
+        <div class="card bg-white rounded-xl shadow-lg overflow-hidden border-t-8 border-t-type-7">
+            <div class="p-6 flex-grow">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span class="text-5xl font-black text-lime-200 absolute opacity-20 -ml-2 -mt-2 type-number">7</span>
+                        <h2 class="text-xl font-bold text-lime-700 relative z-10">İSTEKLİ</h2>
+                        <span class="text-xs font-semibold text-lime-600 uppercase tracking-wide">Maceracı</span>
+                    </div>
+                    <i class="fa-solid fa-plane-departure text-3xl text-lime-400"></i>
+                </div>
+                
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-2 py-1 bg-lime-50 text-lime-700 text-xs rounded-md font-medium">Spontane</span>
+                    <span class="px-2 py-1 bg-lime-50 text-lime-700 text-xs rounded-md font-medium">Çok Yönlü</span>
+                    <span class="px-2 py-1 bg-lime-50 text-lime-700 text-xs rounded-md font-medium">İyimser</span>
+                </div>
+
+                <div class="space-y-3 text-sm text-gray-700">
+                    <p class="text-xs italic p-2 bg-lime-50 rounded-lg border border-lime-200">
+                        <strong class="text-lime-700">Nasıl Tanırım:</strong> Yerinde duramayan, sürekli plan yapan, neşeli, konudan konuya atlayan biridir.
+                    </p>
+                    <ul class="detail-list space-y-1">
+                        <li><strong class="text-lime-800">Temel Arzusu:</strong> Tatmin olmak ve ihtiyaçlarının karşılanması.</li>
+                        <li><strong class="text-lime-800">Temel Korkusu:</strong> Acı çekmek ve yoksunluk.</li>
+                        <li><strong class="text-lime-800">Temel Sorunu:</strong> Oburluk (Daha fazla deneyim ve heyecan isteği).</li>
+                    </ul>
+                    <hr class="border-lime-100"/>
+                    <div class="text-xs space-y-1">
+                        <p><strong>Stres (1'e Gider):</strong> Mükemmeliyetçi olur, insanları yargılar ve katılaşır.</p>
+                        <p><strong>Gelişim (5'e Gider):</strong> Okumaya ve araştırmaya başlar, tek bir konuya odaklanır.</p>
+                    </div>
+                    <hr class="border-lime-100"/>
+                    <p class="text-xs"><strong class="text-lime-800">İletişim:</strong> Enerjisine ayak uydur, özgürlüğünü kısıtlama, seçenekler sun.</p>
+                    <p class="text-xs"><strong class="text-lime-800">Ünlüler:</strong> Robin Williams, Jim Carrey, Mozart.</p>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-3 border-t border-slate-100 flex justify-between text-xs font-semibold">
+                <div class="flex items-center gap-1 text-red-500">
+                    <i class="fa-solid fa-arrow-up-right-from-square transform rotate-45"></i>
+                    <span>Stres Yönü: Tip 1</span>
+                </div>
+                <div class="flex items-center gap-1 text-green-600">
+                    <i class="fa-solid fa-arrow-up-right-from-square transform -rotate-45"></i>
+                    <span>Gelişim Yönü: Tip 5</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TYPE 8: MEYDAN OKUYAN (Lider) -->
+        <div class="card bg-white rounded-xl shadow-lg overflow-hidden border-t-8 border-t-type-8">
+            <div class="p-6 flex-grow">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span class="text-5xl font-black text-red-200 absolute opacity-20 -ml-2 -mt-2 type-number">8</span>
+                        <h2 class="text-xl font-bold text-red-800 relative z-10">MEYDAN OKUYAN</h2>
+                        <span class="text-xs font-semibold text-red-600 uppercase tracking-wide">Lider</span>
+                    </div>
+                    <i class="fa-solid fa-fire text-3xl text-red-500"></i>
+                </div>
+                
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-2 py-1 bg-red-50 text-red-800 text-xs rounded-md font-medium">Güçlü</span>
+                    <span class="px-2 py-1 bg-red-50 text-red-800 text-xs rounded-md font-medium">Koruyucu</span>
+                    <span class="px-2 py-1 bg-red-50 text-red-800 text-xs rounded-md font-medium">Doğrudan</span>
+                </div>
+
+                <div class="space-y-3 text-sm text-gray-700">
+                    <p class="text-xs italic p-2 bg-red-50 rounded-lg border border-red-200">
+                        <strong class="text-red-800">Nasıl Tanırım:</strong> Güçlü bir duruşu olan, ses tonu yüksek, kontrolü elinde tutan ve lafını esirgemez.
+                    </p>
+                    <ul class="detail-list space-y-1">
+                        <li><strong class="text-red-800">Temel Arzusu:</strong> Kendi hayatını yönetmek ve korumak.</li>
+                        <li><strong class="text-red-800">Temel Korkusu:</strong> İncitilmek veya başkaları tarafından kontrol edilmek.</li>
+                        <li><strong class="text-red-800">Temel Sorunu:</strong> Şehvet (Hayatı her anlamda şiddetli ve yoğun yaşama arzusu).</li>
+                    </ul>
+                    <hr class="border-red-100"/>
+                    <div class="text-xs space-y-1">
+                        <p><strong>Stres (5'e Gider):</strong> İçe çekilir, strateji yapar, kimseyle konuşmaz.</p>
+                        <p><strong>Gelişim (2'ye Gider):</strong> Kalbini açar, şefkat gösterir ve başkalarına hizmet eder.</p>
+                    </div>
+                    <hr class="border-red-100"/>
+                    <p class="text-xs"><strong class="text-red-800">İletişim:</strong> Net ol, dolaylı konuşma, sözünün eri ol, ona karşı dürüstçe dik dur.</p>
+                    <p class="text-xs"><strong class="text-red-800">Ünlüler:</strong> Winston Churchill, Martin Luther King Jr., Serena Williams.</p>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-3 border-t border-slate-100 flex justify-between text-xs font-semibold">
+                <div class="flex items-center gap-1 text-red-500">
+                    <i class="fa-solid fa-arrow-up-right-from-square transform rotate-45"></i>
+                    <span>Stres Yönü: Tip 5</span>
+                </div>
+                <div class="flex items-center gap-1 text-green-600">
+                    <i class="fa-solid fa-arrow-up-right-from-square transform -rotate-45"></i>
+                    <span>Gelişim Yönü: Tip 2</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TYPE 9: BARIŞÇI (Uzlaşmacı) -->
+        <div class="card bg-white rounded-xl shadow-lg overflow-hidden border-t-8 border-t-type-9">
+            <div class="p-6 flex-grow">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span class="text-5xl font-black text-emerald-200 absolute opacity-20 -ml-2 -mt-2 type-number">9</span>
+                        <h2 class="text-xl font-bold text-emerald-700 relative z-10">BARIŞÇI</h2>
+                        <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wide">Uzlaşmacı</span>
+                    </div>
+                    <i class="fa-solid fa-dove text-3xl text-emerald-400"></i>
+                </div>
+                
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="px-2 py-1 bg-emerald-50 text-emerald-700 text-xs rounded-md font-medium">Kabul Edici</span>
+                    <span class="px-2 py-1 bg-emerald-50 text-emerald-700 text-xs rounded-md font-medium">Sabırlı</span>
+                    <span class="px-2 py-1 bg-emerald-50 text-emerald-700 text-xs rounded-md font-medium">Huzurlu</span>
+                </div>
+
+                <div class="space-y-3 text-sm text-gray-700">
+                    <p class="text-xs italic p-2 bg-emerald-50 rounded-lg border border-emerald-200">
+                        <strong class="text-emerald-700">Nasıl Tanırım:</strong> Sakin, "fark etmez" diyen, çatışmadan kaçan ve herkesle uyumludur.
+                    </p>
+                    <ul class="detail-list space-y-1">
+                        <li><strong class="text-emerald-800">Temel Arzusu:</strong> Huzur ve istikrar (Bağlantıda kalmak).</li>
+                        <li><strong class="text-emerald-800">Temel Korkusu:</strong> Çatışma, kopma ve parçalanma.</li>
+                        <li><strong class="text-emerald-800">Temel Sorunu:</strong> Tembellik (Kendini ve önceliklerini erteleme).</li>
+                    </ul>
+                    <hr class="border-emerald-100"/>
+                    <div class="text-xs space-y-1">
+                        <p><strong>Stres (6'ya Gider):</strong> Şüpheci olur, korkuları artar ve güvensiz hisseder.</p>
+                        <p><strong>Gelişim (3'e Gider):</strong> Harekete geçer, plan yapar ve kendini gösterir.</p>
+                    </div>
+                    <hr class="border-emerald-100"/>
+                    <p class="text-xs"><strong class="text-emerald-800">İletişim:</strong> Sabırlı ol, karar vermesi için baskı yapma, gerçekten ne istediğini sor.</p>
+                    <p class="text-xs"><strong class="text-emerald-800">Ünlüler:</strong> Abraham Lincoln, Kraliçe II. Elizabeth, Walt Disney.</p>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-3 border-t border-slate-100 flex justify-between text-xs font-semibold">
+                <div class="flex items-center gap-1 text-red-500">
+                    <i class="fa-solid fa-arrow-up-right-from-square transform rotate-45"></i>
+                    <span>Stres Yönü: Tip 6</span>
+                </div>
+                <div class="flex items-center gap-1 text-green-600">
+                    <i class="fa-solid fa-arrow-up-right-from-square transform -rotate-45"></i>
+                    <span>Gelişim Yönü: Tip 3</span>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="text-center mt-12 text-gray-400 text-sm pb-8">
+        <p>Enneagram Kişilik Modeli Özeti - Tüm temel motivasyonlar, korkular ve iletişim ipuçları eklenmiştir.</p>
+    </footer>
+
+</body>
+</html>
