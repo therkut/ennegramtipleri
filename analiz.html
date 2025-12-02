@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Inter font for modern look */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        
         :root {
             font-family: 'Inter', sans-serif;
         }
@@ -140,7 +142,6 @@
 <body class="bg-gray-50 p-4 sm:p-8 min-h-screen flex flex-col items-center">
 
     <div class="max-w-4xl w-full bg-white shadow-2xl rounded-xl p-6 md:p-10 border border-gray-100 mt-8 mb-8">
-
         <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800 mb-6 border-b pb-2 flex items-center">
             <span class="mr-2 text-yellow-500">✨</span> İki Tip Arası Dinamik İletişim Simülasyonu
         </h1>
@@ -167,7 +168,6 @@
                 <span class="mr-2">⚡</span> İletişim Senaryosu Oluştur
             </button>
         </div>
-
 
         <!-- DİYALOG VE SENARYO ALANI -->
         <h2 class="text-xl font-semibold text-gray-700 mb-4 flex items-center border-b pb-2">
@@ -230,10 +230,9 @@
             </div>
             <p id="translation-error-message" class="text-red-600 mt-2 hidden">Hata oluştu.</p>
         </div>
-
     </div>
 
-    <!-- ENNEAGRAM TİP KARTLARI BÖLÜMÜ (Ekran görüntülerinizden esinlenildi) -->
+    <!-- ENNEAGRAM TİP KARTLARI BÖLÜMÜ -->
     <div class="max-w-4xl w-full mt-8">
         <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center border-b pb-2">
             <span class="mr-2 text-indigo-600">📖</span> Seçilen Enneagram Tiplerinin Detayları
@@ -244,10 +243,9 @@
         </div>
     </div>
 
-
     <!-- Firebase ve Gemini API İSTEMCİ KODU -->
     <script type="module">
-        // Firebase Modülleri (Kullanılmasa bile Canvas gereklilikleri için dahil edilmelidir)
+        // Firebase Modülleri
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, setLogLevel } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -273,12 +271,11 @@
         const translationLoadingSpinner = document.getElementById('translation-loading-spinner');
         const translationErrorMessage = document.getElementById('translation-error-message');
 
-
         // Sabitler
         const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
         const API_KEY = ""; // Canvas tarafından sağlanacaktır
         
-        // Enneagram Tipleri Verisi (Dinamik doldurma ve prompt oluşturma için)
+        // Enneagram Tipleri Verisi
         const ENNEAGRAM_TYPES = [
             { id: 1, name: "Reformcu", motivation: "Doğru ve dürüst olmak, mükemmellik.", fear: "Hata yapmak, kusurlu olmak.", color: "red-700", icon: "⚖️", headerBg: "bg-red-100", details: "Temel Arzu: Kusursuzluğa ulaşmak, erdemli olmak. Temel Korku: Yanlış, kusurlu veya kötü olmak. Stres (4'e Gider): Kendi duygusal ihtiyaçlarına odaklanır, dramatikleşebilir. Gelişim (7'ye Gider): Daha spontane ve neşeli olur, eylem odaklıdır." },
             { id: 2, name: "Yardımsever", motivation: "Sevilmek, ilgi görmek, başkalarına hizmet etmek.", fear: "Sevilmemek, istenmemek.", color: "pink-700", icon: "❤️", headerBg: "bg-pink-100", details: "Temel Arzu: Sevilmek, başkaları tarafından takdir edilmek. Temel Korku: Sevilmemek, muhtaç görünmek. Stres (8'e Gider): Kontrolcü ve baskın olabilir, öfkesini dışa vurur. Gelişim (4'e Gider): Kendi ihtiyaçlarına odaklanır, duygusal olarak daha dürüst olur." },
@@ -315,7 +312,6 @@
             }
             authenticate();
         }
-
 
         // UTILITY: Dropdownları doldurur
         function populateTypeSelects() {
@@ -378,7 +374,6 @@
                 </div>
             `;
         }
-
 
         // Genel API Çağrı Yardımcısı (Üstel Geri Çekilme ile)
         async function callGeminiApi(payload, useSearch) {
@@ -456,17 +451,23 @@
                 body: JSON.stringify(finalPayload)
             });
 
-            if (!response.ok) {
-                 throw new Error(`API hatası: ${response.statusText}`);
+            if (!response.ok) { 
+                throw new Error(`API hatası: ${response.statusText}`);
             }
             
             const result = await response.json();
             let jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
             
             if (jsonText) {
-                // 1. Clean markdown fences and common escape sequences
-                jsonText = jsonText.replace(/```json\s*/g, '')
-                                   .replace(/\s*```/g, '')
+                // !!! HATA DÜZELTME BURADA YAPILDI !!!
+                // Regex literal (Örn: /```/) yerine new RegExp kullanarak tarayıcı ayrıştırma hataları önlendi.
+                // Eski hali: .replace(/```json\s*/g, '')
+                
+                const jsonFenceStart = new RegExp("```json\\s*", "g");
+                const jsonFenceEnd = new RegExp("\\s*```", "g");
+                
+                jsonText = jsonText.replace(jsonFenceStart, '')
+                                   .replace(jsonFenceEnd, '')
                                    .replace(/\\"/g, '"') // Unescape internal quotes
                                    .trim();
 
@@ -475,7 +476,6 @@
                 const firstBrace = jsonText.indexOf('{');
                 let startIndex = -1;
 
-                // Determine the starting character
                 if (firstBracket !== -1 && (firstBrace === -1 || firstBracket < firstBrace)) {
                     startIndex = firstBracket;
                 } else if (firstBrace !== -1) {
@@ -486,18 +486,15 @@
                     throw new Error("API'den JSON yapısı bulunamadı (Başlangıç parantezi/küme parantezi yok).");
                 }
 
-                // Find the last closing bracket/brace
                 const lastBracket = jsonText.lastIndexOf(']');
                 const lastBrace = jsonText.lastIndexOf('}');
                 let endIndex = -1;
 
-                // Determine the ending character
                 if (lastBracket > lastBrace) {
                     endIndex = lastBracket;
                 } else if (lastBrace > lastBracket) {
                     endIndex = lastBrace;
                 } else {
-                    // Handle cases where only one type exists or they are equal
                     endIndex = Math.max(lastBracket, lastBrace);
                 }
 
@@ -505,7 +502,6 @@
                     throw new Error("API'den JSON yapısı bulunamadı (Bitiş parantezi/küme parantezi yok veya geçersiz aralık).");
                 }
 
-                // Slice the string to include only the JSON content
                 jsonText = jsonText.substring(startIndex, endIndex + 1).trim();
                 
                 try {
@@ -517,7 +513,6 @@
             }
             throw new Error("API'den geçerli içerik alınamadı.");
         }
-
 
         // LLM FEATURE 1: Yeni İlişki Senaryosu Oluştur (Structured JSON Output)
         async function createNewScenario(senderType, receiverType) {
@@ -582,7 +577,6 @@
 
         // LLM FEATURE 3: Derinlemesine Analiz (Grounding/Search)
         async function getDeepDiveAnalysis(senderType, receiverType) {
-            // Sistem talimatını daha iyi yapılandırılmış, temiz metin çıktısı vermeye zorluyoruz.
             const systemPrompt = `Sen, Enneagram tiplerinin psikolojik derinliklerini analiz eden bir uzmansın. Cevabını 4 ana başlık altında, her başlığı ayrı bir satırda **kalın (bold)** ve ardından iki nokta üst üste (:) kullanarak yapılandır. Cevap formatı: Başlık: Açıklama. Maddeler (listeler) için * işareti kullan. Cevabın başlangıcında ve sonunda gereksiz metinler OLMAMALIDIR. Lütfen sadece Türkçe cevap ver.`;
             const userQuery = `Enneagram Tip ${senderType.id} (${senderType.name}) ve Tip ${receiverType.id} (${receiverType.name})'in temel motivasyonları, korkuları ve bu iki tip arasındaki bir ilişkinin nasıl çatışmaya yol açabileceği hakkında derinlemesine bir analiz yap.`;
 
@@ -628,13 +622,10 @@
                 `;
             }
             
-            // Başlığa ikonları ekle
             const finalTitle = senderIcon && receiverIcon 
                 ? `${senderIcon} ${title} ${receiverIcon}`
                 : `${isSolution ? '🤝' : '🔍'} ${title}`;
 
-
-            // Yeni tasarım: Diyalog kutusuna benziyor (result-block-container, blockClass)
             return `
                 <div class="result-block-container ${blockClass} space-y-4">
                     <h4 class="font-extrabold text-2xl mb-4 border-b pb-2">${finalTitle}</h4>
@@ -646,7 +637,7 @@
             `;
         }
 
-        // UTILITY: Metin Analiz Sonucunu Okunabilir HTML'e Çevirir (Markdown'dan HTML'e) - GÜNCELLENDİ
+        // UTILITY: Metin Analiz Sonucunu Okunabilir HTML'e Çevirir
         function renderAnalysisToHTML(rawText) {
             const lines = rawText.split('\n');
             let html = '';
@@ -666,9 +657,9 @@
 
             lines.forEach(line => {
                 line = line.trim();
-                if (line.length === 0) return; 
+                if (line.length === 0) return;
                 
-                // Başlık/Bölüm Başlıkları (Örn: **Temel Motivasyonlar:**)
+                // Başlık/Bölüm Başlıkları
                 if (line.match(/^\*\*(.*?)\*\*:(.*)$/)) {
                     if (inList) { html += '</ul>'; inList = false; }
                     
@@ -677,7 +668,6 @@
                     const content = match[2].trim();
                     let icon = '';
 
-                    // İkon ekle (Temel Başlıklar için)
                     if (headerText.includes("Motivasyon")) icon = '🌟';
                     else if (headerText.includes("Korku")) icon = '😨';
                     else if (headerText.includes("Çatışma Dinamikleri")) icon = '💥';
@@ -685,12 +675,11 @@
                     
                     html += `<h5><span class="mr-2">${icon}</span> ${headerText}</h5>`;
                     
-                    // Başlıktan sonra gelen metni ekle (varsa)
                     if (content) {
                         html += `<p class="mb-3 text-gray-700">${content.replace(/\n/g, '<br>')}</p>`;
                     }
                 } 
-                // Alt Başlıklar/Çatışma Dinamikleri (Örn: **1'in Eleştirisi ve 9'un Ataleti:**)
+                // Alt Başlıklar/Çatışma Dinamikleri
                 else if (line.match(/^\*\*(.*?)\*\*$/)) {
                     if (inList) { html += '</ul>'; inList = false; }
                     const headerText = line.replace(/^\*\*(.*)\*\*$/, '$1').trim();
@@ -703,38 +692,32 @@
                                 </p>
                     `;
                 }
-                // Alt Başlık Kapatma (Pasif Direnç veya Ataleti Açıklayan Paragraflar için)
+                // Alt Başlık Kapatma ve Listeler
                 else if (line.match(/^[\*\-]\s/)) {
-                    // Maddelere bak (Örn: * Madde veya - Madde)
                     if (!inList) { html += '<ul class="text-gray-700">'; inList = true; }
+                    // Safe regex replacement
                     const content = line.replace(/^[\*\-]\s/, '').trim();
                     html += `<li>${content}</li>`;
                 }
-                // Düz metin (Çatışma bloklarının içindeki açıklamalar)
+                // Düz metin
                 else {
                     if (inList) { html += '</ul>'; inList = false; }
                     
-                    // Eğer bir önceki blok bir conflict-dynamic-block ise, bu metin onun içeriğidir.
                     if (html.endsWith('</p>')) {
-                        // Yeni bir paragraf aç, önceki conflict-dynamic-block'u kapat
                         html += `</div><p class="mb-3 text-gray-700">${line.replace(/\n/g, '<br>')}</p>`;
                     } else if (html.endsWith('</p>') || html.endsWith('</ul>')) {
-                        // Yeni bir paragraf aç, önceki conflict-dynamic-block'u kapat
                         html += `</div><p class="mb-3 text-gray-700">${line.replace(/\n/g, '<br>')}</p>`;
                     } else if (html.endsWith('</p>') || html.endsWith('</ul>') || html.endsWith('</div>')) {
                         html += `<p class="mb-3 text-gray-700">${line.replace(/\n/g, '<br>')}</p>`;
                     } else if (html.endsWith('</ul>')) {
                         html += `</div><p class="mb-3 text-gray-700">${line.replace(/\n/g, '<br>')}</p>`;
                     } else {
-                        // Normal paragraf metni
                         html += `<p class="mb-3 text-gray-700">${line.replace(/\n/g, '<br>')}</p>`;
                     }
                 }
             });
             
-            // Açık kalan liste veya dinamik bloğu kapat
             if (inList) { html += '</ul>'; }
-            // En sondaki bloğun kapatıldığından emin ol
             if (html.includes('<div class="conflict-dynamic-block">') && !html.endsWith('</div>')) {
                  html += '</div>';
             }
@@ -769,15 +752,13 @@
                 `;
             });
 
-            // Diyalog metnini gizli bir alanda sakla
             dialogueArea.innerHTML = html + `<textarea id="current-scenario-text" class="hidden">${fullScenarioText}</textarea>`;
             
-            // Analiz/Çözüm butonlarını etkinleştir
             solveButton.disabled = false;
             analyzeButton.disabled = false;
         }
 
-        // UTILITY: Çözüm JSON'unu Okunabilir HTML'e Çevirir (Diyalogları İçerecek Şekilde)
+        // UTILITY: Çözüm JSON'unu Okunabilir HTML'e Çevirir
         function renderSolutionToHTML(solutionData, senderType, receiverType) {
             let html = '';
             
@@ -787,7 +768,7 @@
                 <p class="text-gray-700">${solutionData.initial_analysis}</p>
             `;
             
-            // 2. Yeni Diyalog Senaryosu (Konuşma Balonları ile)
+            // 2. Yeni Diyalog Senaryosu
             html += `
                 <h5 class="text-lg font-bold"><span class="mr-2">💬</span> Uzlaşma Diyaloğu: "${solutionData.title}"</h5>
                 <div class="solution-dialogue-container space-y-3">
@@ -798,7 +779,6 @@
                 const speakerData = ENNEAGRAM_TYPES.find(t => t.id == speakerId) || { name: 'Bilinmeyen', color: 'gray-700', icon: '❓' };
                 const isSender = senderType.id == speakerId;
                 
-                // Çözüm diyalogları için ana senaryo stilini kullanıyoruz
                 const bubbleClass = isSender ? 'speech-bubble-sender' : 'speech-bubble-receiver';
                 const textColor = speakerData.color;
 
@@ -814,7 +794,7 @@
                 `;
             });
 
-            html += `</div>`; // .solution-dialogue-container kapatma
+            html += `</div>`; 
 
             // 3. Neden İşe Yaradı Özeti
             html += `
@@ -825,7 +805,7 @@
             return html;
         }
 
-        // UI Güncelleme Fonksiyonu (Genel - Analiz/Çözüm Bölümü için)
+        // UI Güncelleme Fonksiyonu (Genel)
         function updateResultUI(isLoading, resultHTML = null, sources = []) {
             generateScenarioButton.disabled = isLoading;
             solveButton.disabled = isLoading;
@@ -849,7 +829,7 @@
             }
         }
 
-        // UI Güncelleme Fonksiyonu (Çeviri Bölümü için)
+        // UI Güncelleme Fonksiyonu (Çeviri)
         function updateTranslationUI(isLoading, resultText = null, error = false) {
             translateButton.disabled = isLoading;
             translationLoadingSpinner.classList.toggle('hidden', !isLoading);
@@ -861,8 +841,8 @@
                 return;
             }
 
-            if (error) {
-                 translationResultArea.classList.add('hidden');
+            if (error) { 
+                 translationResultArea.classList.add('hidden'); 
                  return;
             }
 
@@ -874,29 +854,23 @@
             }
         }
 
-
         // Olay Dinleyicileri
-
-        // Dropdown değiştiğinde tip kartlarını güncelle
         senderTypeSelect.addEventListener('change', updateTypeCards);
         receiverTypeSelect.addEventListener('change', updateTypeCards);
 
-
-        // 1. İletişim Senaryosu Oluştur (LLM Feature 1)
+        // 1. İletişim Senaryosu Oluştur
         generateScenarioButton.addEventListener('click', async () => {
             const senderType = ENNEAGRAM_TYPES.find(t => t.id == senderTypeSelect.value);
             const receiverType = ENNEAGRAM_TYPES.find(t => t.id == receiverTypeSelect.value);
 
-            // Giriş alanını temizle ve yükleniyor durumunu göster
             dialogueArea.innerHTML = `<div class="flex justify-center items-center h-[150px]"><div class="spinner"></div><p class="ml-4 text-indigo-600">Senaryo oluşturuluyor...</p></div>`;
             solveButton.disabled = true;
             analyzeButton.disabled = true;
-            updateResultUI(false); // Önceki analiz sonuçlarını temizle
+            updateResultUI(false); 
 
             try {
                 const scenarioData = await createNewScenario(senderType, receiverType);
                 renderScenarioToHTML(scenarioData, senderType, receiverType);
-                
             } catch (error) {
                 console.error("Yeni senaryo oluşturulamadı:", error);
                 dialogueArea.innerHTML = `<div class="p-4 bg-red-100 border border-red-400 rounded-lg text-red-700">
@@ -906,8 +880,7 @@
             }
         });
 
-
-        // 2. Alternatif Çözüm Önerisi (LLM Feature 2)
+        // 2. Alternatif Çözüm Önerisi
         solveButton.addEventListener('click', async () => {
             const scenarioTextElement = document.getElementById('current-scenario-text');
             if (!scenarioTextElement) {
@@ -922,13 +895,12 @@
             updateResultUI(true);
             try {
                 const solutionData = await getAlternativeSolution(senderType, receiverType, scenarioText);
-                
                 const solutionContentHTML = renderSolutionToHTML(solutionData, senderType, receiverType);
 
                 const solutionHTML = createAnalysisBlockHTML(
                     'Alternatif Çözüm Önerisi (Uzlaşma Planı)',
                     solutionContentHTML,
-                    true // isSolution
+                    true 
                 );
                 updateResultUI(false, solutionHTML);
             } catch (error) {
@@ -937,7 +909,7 @@
             }
         });
 
-        // 3. Derinlemesine Analiz (LLM Feature 3 - Grounding)
+        // 3. Derinlemesine Analiz
         analyzeButton.addEventListener('click', async () => {
             const senderType = ENNEAGRAM_TYPES.find(t => t.id == senderTypeSelect.value);
             const receiverType = ENNEAGRAM_TYPES.find(t => t.id == receiverTypeSelect.value);
@@ -945,17 +917,15 @@
             updateResultUI(true);
             try {
                 const { text, sources } = await getDeepDiveAnalysis(senderType, receiverType);
-                
-                // Metni al ve daha okunabilir HTML formatına çevir (GÜNCELLENMİŞ FONKSİYON)
                 const readableHTML = renderAnalysisToHTML(text);
                 
                 const analysisHTML = createAnalysisBlockHTML(
                     `Derinlemesine Analiz: Tip ${senderType.id} (${senderType.name}) ve Tip ${receiverType.id} (${receiverType.name}) Dinamikleri`,
                     readableHTML,
-                    false, // isSolution
+                    false, 
                     sources,
-                    senderType.icon, // Tip 1 ikonu
-                    receiverType.icon // Tip 9 ikonu
+                    senderType.icon, 
+                    receiverType.icon 
                 );
 
                 updateResultUI(false, analysisHTML);
@@ -965,7 +935,7 @@
             }
         });
         
-        // 4. Empatik Çeviri (LLM Feature 4)
+        // 4. Empatik Çeviri
         translateButton.addEventListener('click', async () => {
             const dialogueText = dialogueInput.value.trim();
             if (!dialogueText) {
@@ -985,7 +955,7 @@
             }
         });
         
-        // Başlangıçta dropdownları doldur ve kartları yükle
+        // Başlat
         populateTypeSelects();
         updateTypeCards();
 
