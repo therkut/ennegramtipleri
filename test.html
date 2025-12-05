@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enneagram Mizaç Belirleme Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            min-height: 100vh;
+        }
+        .step-card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+        }
+        .option-label {
+            transition: all 0.2s;
+            cursor: pointer;
+            line-height: 1.4;
+        }
+        .option-label:hover {
+            background-color: #e0f2f1; /* Cyan-50 hover */
+        }
+        input[type="radio"]:checked + .option-label {
+            background-color: #a7f3d0; /* Emerald-200 for checked */
+            border-color: #059669; /* Emerald-600 border */
+            transform: scale(1.01);
+        }
+        /* Sonuç kartı için genel stil */
+        .result-card {
+            border-left: 6px solid #4f46e5; /* Indigo */
+        }
+        .wing-btn {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+        }
+        .wing-btn:hover {
+            background-color: #f3f4f6;
+        }
+        .wing-btn.selected {
+            background-color: #bfdbfe; /* Blue-200 for selected wing */
+            border-color: #3b82f6; /* Blue-500 border */
+        }
+        /* Stres ve Gelişim Açıklama Stilini ayarlama */
+        .arrow-container {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        /* Maddeleme stilleri */
+        .arrow-list {
+            list-style-type: none; 
+            list-style-position: inside;
+        }
+        .arrow-list li {
+            text-indent: -1em; 
+            padding-left: 1em;
+        }
+        .arrow-description p {
+            margin-bottom: 4px;
+        }
+        /* Dinamik SVG container - Yeni boyutlar */
+        .central-icon-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 120px; /* Mobil */
+            height: 120px;
+            margin: 0 1rem;
+            flex-shrink: 0;
+            z-index: 10; /* Vektörün metinlerin üzerinde kalmasını sağla */
+        }
+        @media (min-width: 768px) {
+            .central-icon-container {
+                width: 150px; /* Masaüstü */
+                height: 150px;
+            }
+        }
+        /* Flexbox düzenini iyileştirme */
+        .result-arrows {
+            display: flex;
+            align-items: stretch; /* İçeriklerin dikeyde esnemesini sağlar */
+            justify-content: space-between;
+            position: relative; /* Vektör için konumlandırma bağlamı */
+        }
+        .arrow-wrapper {
+            flex: 1; /* Metin alanlarının esnemesini sağlar */
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex items-start justify-center">
+
+    <div id="app" class="w-full max-w-2xl">
+        <!-- Header Başlık Kısaltıldı -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800 mb-2">
+                <i class="fa-solid fa-compass text-indigo-500 mr-2"></i>
+                ENNEAGRAM MİZAÇ TESTİ
+            </h1>
+            <p class="text-gray-500 text-md">Lütfen her soruda kendinizi en iyi anlatan tek bir seçeneği işaretleyin. Yanıtlarınız mizaç çekirdeğinizin derinliğini yansıtacaktır.</p>
+        </header>
+
+        <!-- Quiz Container -->
+        <div id="quiz-container" class="space-y-6">
+            <!-- Soru 1: Eylem ve Odaklanma Tarzı -->
+            <div class="step-card" data-step="1">
+                <h2 class="text-xl font-bold text-gray-700 mb-4">1. Sizi en iyi ifade eden seçeneği işaretleyiniz.</h2>
+                <div class="space-y-3 text-sm">
+                    <input type="radio" id="q1a" name="q1" value="1,6" class="hidden">
+                    <label for="q1a" class="option-label block p-4 border border-gray-200 rounded-lg shadow-sm text-gray-800 space-y-1">
+                        <span class="font-medium text-indigo-600 mr-2">A.</span> Tutarlı olmaya dikkat eden, kuralcı, ayrıntıcı ve dikkatli, ilkelerine çok bağlı, disiplinli ve ölçülü hareket eden.
+                    </label>
+                    <input type="radio" id="q1b" name="q1" value="7,3" class="hidden">
+                    <label for="q1b" class="option-label block p-4 border border-gray-200 rounded-lg shadow-sm text-gray-800 space-y-1">
+                        <span class="font-medium text-indigo-600 mr-2">B.</span> Neşe ve enerjisini yükselten şeylere çekilim duyan, hayattan keyif almak isteyen, yeni şeyler deneyimlemeyi seven, pozitif ve iyimser.
+                    </label>
+                    <input type="radio" id="q1c" name="q1" value="9,2" class="hidden">
+                    <label for="q1c" class="option-label block p-4 border border-gray-200 rounded-lg shadow-sm text-gray-800 space-y-1">
+                        <span class="font-medium text-indigo-600 mr-2">C.</span> Çevresiyle uyumlu olmaya gayret eden, çatışmayı sevmeyen, rahat ve huzur arayan, eyleme çabuk geçmekte zorlanan, yerine göre erteleyen.
+                    </label>
+                </div>
+            </div>
+
+            <!-- Soru 2: İlişkisel ve Kontrol Tarzı -->
+            <div class="step-card" data-step="2">
+                <h2 class="text-xl font-bold text-gray-700 mb-4">2. Sizi en iyi ifade eden seçeneği işaretleyiniz.</h2>
+                <div class="space-y-3 text-sm">
+                    <input type="radio" id="q2a" name="q2" value="5,4" class="hidden">
+                    <label for="q2a" class="option-label block p-4 border border-gray-200 rounded-lg shadow-sm text-gray-800 space-y-1">
+                        <span class="font-medium text-indigo-600 mr-2">A.</span> Kimseye muhtaç olmak istemeyen, bilgiye derinlemesine meraklı, ilişkilerinde mesafeli ve kontrollü, yoğun duygusallıktan hoşlanmayan.
+                    </label>
+
+                    <input type="radio" id="q2b" name="q2" value="8,3" class="hidden">
+                    <label for="q2b" class="option-label block p-4 border border-gray-200 rounded-lg shadow-sm text-gray-800 space-y-1">
+                        <span class="font-medium text-indigo-600 mr-2">B.</span> Yönerge almaktan ve edilgen olmaktan hoşlanmayan, açık ve net konuşan, güçlü olduğunu hissetmekten hoşlanan, sahiplenici ve otoriter.
+                    </label>
+
+                    <input type="radio" id="q2c" name="q2" value="2,7" class="hidden">
+                    <label for="q2c" class="option-label block p-4 border border-gray-200 rounded-lg shadow-sm text-gray-800 space-y-1">
+                        <span class="font-medium text-indigo-600 mr-2">C.</span> İlişkilerinde sıcak ve samimi, yardım etmekten mutlu olan, duygularını belli eden, çevresindekilerin ilgisini üzerine çekmeyi isteyen, sosyal ve konuşkan.
+                    </label>
+                </div>
+            </div>
+
+            <!-- Soru 3: Kaygı ve Arzu Kaynağı -->
+            <div class="step-card" data-step="3">
+                <h2 class="text-xl font-bold text-gray-700 mb-4">3. Sizi en iyi ifade eden seçeneği işaretleyiniz.</h2>
+                <div class="space-y-3 text-sm">
+                    <input type="radio" id="q3a" name="q3" value="6,1" class="hidden">
+                    <label for="q3a" class="option-label block p-4 border border-gray-200 rounded-lg shadow-sm text-gray-800 space-y-1">
+                        <span class="font-medium text-indigo-600 mr-2">A.</span> Güvende olmayı ve emniyeti önceleyen, tedbiri elden bırakmayan, sadakate önem veren, net olmayan konular karşısında endişe duyan, belirsizliği sevmeyen.
+                    </label>
+
+                    <input type="radio" id="q3b" name="q3" value="3,7" class="hidden">
+                    <label for="q3b" class="option-label block p-4 border border-gray-200 rounded-lg shadow-sm text-gray-800 space-y-1">
+                        <span class="font-medium text-indigo-600 mr-2">B.</span> Başarılı olmayı isteyen ve hedef koyan, öne çıkmayı seven, çevresini iyi algılayan ve duruma göre tavır alabilen, aktif ve verimli çalışan, performans odaklı.
+                    </label>
+
+                    <input type="radio" id="q3c" name="q3" value="4,5" class="hidden">
+                    <label for="q3c" class="option-label block p-4 border border-gray-200 rounded-lg shadow-sm text-gray-800 space-y-1">
+                        <span class="font-medium text-indigo-600 mr-2">C.</span> Duygularını yoğun yaşayan ve hassas, anlaşılmak isteyen, özgün ve sıra dışı, estetik bakış açısına sahip, kendinde eksik olana odaklı ve nostaljik.
+                    </label>
+                </div>
+            </div>
+
+            <!-- Soru 4: En Yoğun İçsel Eğilim -->
+            <div class="step-card" data-step="4">
+                <h2 class="text-xl font-bold text-gray-700 mb-4">4. Sizi en iyi ifade eden seçeneği işaretleyiniz.</h2>
+                <div class="space-y-3 text-sm">
+                    <input type="radio" id="q4a" name="q4" value="1" class="hidden">
+                    <label for="q4a" class="option-label block p-4 border border-gray-200 rounded-lg shadow-sm text-gray-800 space-y-1">
+                        <span class="font-medium text-indigo-600 mr-2">A.</span> Titiz ve düzenli, kurallara uyulmadığında gerilen ve kızan, her yönüyle bilmek ve eksiksiz uygulamak isteyen, doğrular konusunda ısrarcı ve eleştirisel.
+                    </label>
+
+                    <input type="radio" id="q4b" name="q4" value="2" class="hidden">
+                    <label for="q4b" class="option-label block p-4 border border-gray-200 rounded-lg shadow-sm text-gray-800 space-y-1">
+                        <span class="font-medium text-indigo-600 mr-2">B.</span> Bir miktar alıngan, çabuk kaynaşabilen, sıcakkanlı ve insan canlısı, canlılara karşı şefkatli ve merhametli, sevdiği kişilerle duygusal yakınlık hisseden.
+                    </label>
+
+                    <input type="radio" id="q4c" name="q4" value="4" class="hidden">
+                    <label for="q4c" class="option-label block p-4 border border-gray-200 rounded-lg shadow-sm text-gray-800 space-y-1">
+                        <span class="font-medium text-indigo-600 mr-2">C.</span> Kreatif olabilen ve özgün, nitelikli olana çekilim duyan, işler zorlaştığında karamsarlığa kapılabilen, geçmişin hatıralarını önemseyen ve çizgi dışı yalnız kalma isteği duyan.
+                    </label>
+                </div>
+            </div>
+
+            <!-- Soru 5: İçsel Çatışma ve Dışa Vurum -->
+            <div class="step-card" data-step="5">
+                <h2 class="text-xl font-bold text-gray-700 mb-4">5. Aşağıdaki paragraflardan hangisini kendinize daha yakın buluyorsunuz?</h2>
+                <div class="space-y-3 text-sm">
+                    <input type="radio" id="q5a" name="q5" value="1,6" class="hidden">
+                    <label for="q5a" class="option-label block p-4 border border-gray-200 rounded-lg shadow-sm text-gray-800 space-y-1">
+                        <span class="font-medium text-indigo-600 mr-2">A.</span> Hata yapmamak için en ince detaylarına kadar yapacaklarımı planlarım, çıkabilecek aksiliklerden çok endişe duyarım. Küçük bir hata/eksiklik durumunda hemen gerilirim ama öfkemi göstermekten kaçınırım.
+                    </label>
+
+                    <input type="radio" id="q5b" name="q5" value="8,3" class="hidden">
+                    <label for="q5b" class="option-label block p-4 border border-gray-200 rounded-lg shadow-sm text-gray-800 space-y-1">
+                        <span class="font-medium text-indigo-600 mr-2">B.</span> İlkelerimi ve hayat görüşümü paylaşacak bir insanla güçlü bir bağ kurup tam olarak anlaşılmak isterim. Haklı olduğuma inandığımda yanlışlara karşı öfkemi güçlü bir şekilde ifade etmekten çekinmem.
+                    </label>
+
+                    <input type="radio" id="q5c" name="q5" value="9,2" class="hidden">
+                    <label for="q5c" class="option-label block p-4 border border-gray-200 rounded-lg shadow-sm text-gray-800 space-y-1">
+                        <span class="font-medium text-indigo-600 mr-2">C.</span> Ortak ilke ve değerler etrafında toplanmış insanlarla birlikte doğru şeyler yapmak için sorumluluk hissederim. Bildiğim doğruları herkese anlatmaya ve örnek olmaya çalışırım.
+                    </label>
+                </div>
+            </div>
+
+            <!-- Hesapla Butonu -->
+            <div class="text-center pt-4">
+                <button id="calculate-btn" disabled class="px-8 py-3 bg-indigo-600 text-white font-semibold rounded-full shadow-md hover:bg-indigo-700 transition duration-300 opacity-50 cursor-not-allowed">
+                    <i class="fa-solid fa-chart-bar mr-2"></i>
+                    Mizacımı Hesapla
+                </button>
+            </div>
+        </div>
+
+        <!-- Result Container - Standart Sonuç veya Teyit Başlangıcı -->
+        <div id="result-container" class="mt-8 hidden">
+            <div id="result-card" class="result-card p-6 bg-white rounded-xl shadow-xl">
+                <!-- Sonuçlar buraya JS ile eklenecek -->
+            </div>
+        </div>
+
+        <!-- Confirmation Container - DİNAMİK OLARAK TÜM TİPLER İÇİN KANAT TEYİDİ BURADA YAPILACAK -->
+        <div id="confirmation-container" class="mt-8 hidden">
+             <div class="result-card p-6 bg-white rounded-xl shadow-xl border-left-4 border-indigo-600">
+                <h2 class="text-2xl font-extrabold text-indigo-700 mb-4">
+                    <i class="fa-solid fa-arrows-split-up-and-merge mr-2"></i>
+                    Son Teyit Adımı: Kanat Mizaç Teyidi
+                </h2>
+                
+                <div id="confirmation-text">
+                    <!-- Dinamik temel tanım buraya gelecek -->
+                </div>
+
+                <div id="wing-options" class="space-y-4">
+                    <!-- Dinamik kanat butonları buraya gelecek -->
+                </div>
+                
+                <!-- Geri Dön Butonu -->
+                <div class="mt-6 pt-4 border-t border-gray-200">
+                     <button id="go-back-btn" class="px-6 py-2 bg-gray-200 text-gray-700 font-semibold rounded-full shadow-md hover:bg-gray-300 transition duration-300">
+                        <i class="fa-solid fa-arrow-left mr-2"></i>
+                        Geri Dön & Cevaplarımı Gözden Geçir
+                    </button>
+                </div>
+             </div>
+        </div>
+    </div>
+
+    <script>
+        // Mizaç Tipleri için ikon haritası (Global olarak tanımlandı)
+        const typeIcons = {
+            1: 'fa-solid fa-scale-balanced', // Reformcu
+            2: 'fa-solid fa-heart', // Yardımsever
+            3: 'fa-solid fa-trophy', // Başarılı
+            4: 'fa-solid fa-palette', // Bireysel
+            5: 'fa-solid fa-glasses', // Araştırmacı
+            6: 'fa-solid fa-shield-halved', // Sorgulayıcı
+            7: 'fa-solid fa-plane-departure', // İstekli
+            8: 'fa-solid fa-fire', // Meydan Okuyan
+            9: 'fa-solid fa-dove', // Barışçı
+        };
+
+        // Enneagram Nokta Koordinatları (SVG için)
+        // Merkez: (100, 100), Yarıçap: 80
+        const ENNEAGRAM_POINTS = {
+            9: { x: 100, y: 20 },
+            1: { x: 168, y: 32 },
+            2: { x: 180, y: 100 },
+            3: { x: 168, y: 168 },
+            4: { x: 100, y: 180 },
+            5: { x: 32, y: 168 },
+            6: { x: 20, y: 100 },
+            7: { x: 32, y: 32 },
+            8: { x: 137, y: 30 } // 7-9 arasına daha yakın bir değer
+        };
+
+        const allQuestions = 5;
+        let typeScores = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 };
+        const quizContainer = document.getElementById('quiz-container');
+        const calculateBtn = document.getElementById('calculate-btn');
+        const resultContainer = document.getElementById('result-container');
+        const resultCard = document.getElementById('result-card');
+        const confirmationContainer = document.getElementById('confirmation-container');
+        const goBackBtn = document.getElementById('go-back-btn');
+        const confirmationTextDiv = document.getElementById('confirmation-text');
+        const wingOptionsDiv = document.getElementById('wing-options');
+        let currentHighestType = null; // Kanat seçimi için temel tipi tutar
+
+        const typeDescriptions = {
+            1: "REFORMCU (Mükemmeliyetçi): Temel motivasyonunuz doğruluk, bütünlük ve mükemmeliyet arayışıdır. Titizlik, prensipli hareket etme ve sorumluluk temel özelliklerinizdir.",
+            2: "YARDIMSEVER (Verici): Temel motivasyonunuz sevilme ve takdir edilme isteğidir. Sıcakkanlı, empatik ve başkalarına destek olmaya odaklısınız.",
+            3: "BAŞARICI (Motive Edici): Temel motivasyonunuz değerli ve başarılı hissetmektir. Hedef odaklı, enerjik ve çevreniz üzerinde olumlu bir imaj bırakmaya gayret edersiniz.",
+            4: "BİREYSEL (Özgün): Temel motivasyonunuz özgünlük, anlam ve kendiniz olma isteğidir. Duygusallığınız yoğun, estetiğe önem veren ve kendinizi eşsiz hissedersiniz.",
+            5: "ARAŞTIRMACI (Gözlemci): Temel motivasyonunuz yeterli ve bilgili olmaktır. Geri çekilmeyi, gözlemlemeyi ve derinlemesine bilgi edinmeyi seversiniz.",
+            6: "SORGULAYICI (Sadık): Temel motivasyonunuz güvenlik, destek ve aidiyet arayışıdır. Tedbirli, sadık ve çevrenizdeki tehlikelere karşı sorgulayıcı yaklaşırsınız.",
+            7: "İSTEKLİ (Maceracı): Temel motivasyonunuz tatmin olma ve acıdan kaçınma isteğidir. Pozitif, enerjik, yeni deneyimlere açık ve spontane olmayı seversiniz.",
+            8: "MEYDAN OKUYAN (Lider): Temel motivasyonunuz güçlü olma ve kendi hayatınızı yönetme arzusudur. Doğrudan, otoriter ve kontrolü elinizde tutmaktan çekinmezsiniz.",
+            9: "BARIŞÇI (Uzlaşmacı): Temel motivasyonunuz huzur, iç denge ve çatışmadan kaçınma isteğidir. Uyumlu, sakin ve genellikle erteleme eğilimi gösterirsiniz."
+        };
+        
+        // Mizaç Tipleri için ikon, stres ve gelişim (oklar) ve Ünlüler haritası (3 TR, 3 Dünya güncellendi)
+        const typeDetails = {
+            1: { 
+                icon: 'fa-solid fa-scale-balanced', name: 'Reformcu', core: 'Yaptığı işi kusursuz yapmak isteyen, planlı hareket eden, sorumluluk sahibi, eksikleri çabuk fark edip düzeltmek isteyen, düzenli biriyim.', wings: [9, 2], stress: 4, growth: 7, 
+                celebs: ['Türkiye: Mustafa Kemal Atatürk, Tarkan, Genco Erkal', 'Dünya: Nelson Mandela, Tom Cruise, Hillary Clinton']
+            },
+            2: { 
+                icon: 'fa-solid fa-heart', name: 'Yardımsever', core: 'İlişkilerinde sıcak ve samimi, yardım etmekten ve faydalı olmaktan mutlu olan, duygularını belli eden, çevresindekilerin duygularını anlamaya odaklı biriyim.', wings: [1, 3], stress: 8, growth: 4,
+                celebs: ['Türkiye: Ajda Pekkan, Müge Anlı, Sezen Aksu', 'Dünya: Prenses Diana, Dolly Parton, Celine Dion']
+            },
+            3: { 
+                icon: 'fa-solid fa-trophy', name: 'Başarılı', core: 'Başarılı olmayı isteyen ve hedef koyan, öne çıkmayı seven ve en iyi olmaya gayret eden, aktif ve üretken çalışan, performans odaklı biriyim.', wings: [2, 4], stress: 9, growth: 6,
+                celebs: ['Türkiye: Acun Ilıcalı, Cem Yılmaz, Rahmi Koç', 'Dünya: Oprah Winfrey, Tony Robbins, Taylor Swift']
+            },
+            4: { 
+                icon: 'fa-solid fa-palette', name: 'Bireysel', core: 'Duygularını yoğun yaşayan ve hassas, anlaşılmak isteyen, özgün ve sıra dışı, estetik bakış açısına sahip, anlam arayışı olan ve içe dönük biriyim.', wings: [3, 5], stress: 2, growth: 1,
+                celebs: ['Türkiye: Orhan Gencebay, Leyla Gencer, Selda Bağcan', 'Dünya: Frida Kahlo, Johnny Depp, Amy Winehouse']
+            },
+            5: { 
+                icon: 'fa-solid fa-glasses', name: 'Araştırmacı', core: 'Kimseye muhtaç olmak istemeyen ve elindekileri dikkatli kullanan, bilgiye derinlemesine meraklı, ilişkilerinde mesafeli ve kontrollü, dikkatli ve detaycı bir gözlem gücü olan biriyim.', wings: [4, 6], stress: 7, growth: 8,
+                celebs: ['Türkiye: Can Yücel, İlber Ortaylı, Uğur Dündar', 'Dünya: Albert Einstein, Bill Gates, Mark Zuckerberg']
+            },
+            6: { 
+                icon: 'fa-solid fa-shield-halved', name: 'Sorgulayıcı', core: 'Güvende olmayı ve emniyeti önceleyen, tedbiri elden bırakmayan, sadakate önem veren, net olmayan konular karşısında endişe duyan, risk alırken dikkatli ve belirsizliği sevmeyen biriyim.', wings: [5, 7], stress: 3, growth: 9,
+                celebs: ['Türkiye: Haluk Levent, Yılmaz Erdoğan, Şener Şen', 'Dünya: Tom Hanks, Prenses Diana (6w7), Malcolm X']
+            },
+            7: { 
+                icon: 'fa-solid fa-plane-departure', name: 'İstekli', core: 'Neşe ve enerjisini yükselten şeylere çekilim duyan, hayattan keyif almak isteyen, monotonluk ve rutinden çabuk sıkılan, yeni şeyler deneyimlemeyi seven, olaylara pozitif tarafından bakan biriyim.', wings: [6, 8], stress: 1, growth: 5,
+                celebs: ['Türkiye: Beyazıt Öztürk, Şahan Gökbakar, Okan Bayülgen', 'Dünya: Robin Williams, Jim Carrey, Leonardo da Vinci']
+            },
+            8: { 
+                icon: 'fa-solid fa-fire', name: 'Meydan Okuyan', core: 'Yönerge almaktan ve edilgen olmaktan hoşlanmayan, açık ve net konuşan, güçlü olduğunu hissetmekten hoşlanan, zorlu mücadele etmekten motive olan, sahiplenici ve otoriter biriyim.', wings: [7, 9], stress: 5, growth: 2,
+                celebs: ['Türkiye: Fatih Terim, Tansu Çiller, Hıncal Uluç', 'Dünya: Martin Luther King Jr., Winston Churchill, Serena Williams']
+            },
+            9: { 
+                icon: 'fa-solid fa-dove', name: 'Barışçı', core: 'Çevresi ile uyumlu olmaya gayret eden, çatışmayı ve gerilimi sevmeyen, rahat ve huzur arayan, rutin bir düzen oluşturmaya gayret eden, eyleme çabuk geçmekte zorlanan biriyim.', wings: [8, 1], stress: 6, growth: 3,
+                celebs: ['Türkiye: Barış Manço, Kemal Sunal, İbrahim Tatlıses', 'Dünya: Abraham Lincoln, Kraliçe II. Elizabeth, Walt Disney']
+            }
+        };
+
+        // Kanat Detayları (A ve B seçenekleri)
+        const wingDetails = {
+            // Tip 1 Wings (w9, w2)
+            '1w9': { label: 'B. Kanat 9 Etkisi (Barışçıl):', text: 'Çatışmaktan uzak duran, müdahale etmeden de durabilen, sakin, uyumlu ve sabırlı, uzlaşmaya çalışan, esnek ve kabullenici, denge ve barışı önemseyen, kibar ve anlayışlı yanlarım da vardır.', icon: typeIcons[9], color: 'emerald' },
+            '1w2': { label: 'A. Kanat 2 Etkisi (Yardımsever):', text: 'Arkadaş canlısı, paylaşımı seven ilişkilere önem veren, yardımsever ve duyguları önemseyen, destekleyici ve fedakar yanlarım vardır.', icon: typeIcons[2], color: 'red' },
+            // Tip 2 Wings (w1, w3)
+            '2w1': { label: 'A. Kanat 1 Etkisi (Reformcu):', text: 'Yardım etme isteğimin yanı sıra, yaptığım işte ahlaki doğruluğa ve mükemmeliyete önem veren, daha eleştirel ve prensipli yanlarım vardır.', icon: typeIcons[1], color: 'slate' },
+            '2w3': { label: 'B. Kanat 3 Etkisi (Başarılı):', text: 'Yardımseverliğimi ve ilgimi göstermenin yanında, takdir edilmeye, imajıma ve başarıya daha çok odaklanan, enerjik ve hırslı yanlarım vardır.', icon: typeIcons[3], color: 'amber' },
+            // Tip 3 Wings (w2, w4)
+            '3w2': { label: 'A. Kanat 2 Etkisi (Yardımsever):', text: 'Başarılı olma hedefimin yanında, insan ilişkilerine, popülerliğe ve başkalarına yardım ederek ilgi çekmeye odaklanan, daha sosyal ve cömert yanlarım vardır.', icon: typeIcons[2], color: 'red' },
+            '3w4': { label: 'B. Kanat 4 Etkisi (Bireysel):', text: 'Başarı ve imajımın yanında, kendimi özgün ve özel hissetmeye önem veren, yaratıcı, derin ve zaman zaman duygusal dalgalanmalar yaşayan, sanatçı yanlarım vardır.', icon: typeIcons[4], color: 'purple' },
+            // Tip 4 Wings (w3, w5)
+            '4w3': { label: 'A. Kanat 3 Etkisi (Başarılı):', text: 'Özgünlük ve anlam arayışımın yanında, yeteneklerimi sergilemek, başarılı olmak ve sosyal olarak takdir edilmek isteyen, daha dışa dönük ve hırslı yanlarım vardır.', icon: typeIcons[3], color: 'amber' },
+            '4w5': { label: 'B. Kanat 5 Etkisi (Araştırmacı):', text: 'Duygusallığımın yanında, daha içe dönük, bilgiyi derinlemesine araştıran ve gözlemleyen, entelektüel ve yalnız kalmayı tercih eden, mesafeli yanlarım vardır.', icon: typeIcons[5], color: 'cyan' },
+            // Tip 5 Wings (w4, w6)
+            '5w4': { label: 'A. Kanat 4 Etkisi (Bireysel):', text: 'Bilgiye olan düşkünlüğümün yanında, duygusal derinliğe, estetiğe ve özgünlüğe daha fazla önem veren, sanatsal ve melankolik yanlarım vardır.', icon: typeIcons[4], color: 'purple' },
+            '5w6': { label: 'B. Kanat 6 Etkisi (Sorgulayıcı):', text: 'Gözlem ve araştırmanın yanında, kendimi güvende hissetmeye odaklanan, daha şüpheci, sadık ve kurallara uymayı tercih eden, endişeli yanlarım vardır.', icon: typeIcons[6], color: 'stone' },
+            // Tip 6 Wings (w5, w7)
+            '6w5': { label: 'A. Kanat 5 Etkisi (Araştırmacı):', text: 'Güvenlik arayışımın yanında, daha mesafeli, entelektüel, bilgi odaklı ve içe dönük, şüphelerimi mantıkla analiz etmeye çalışan yanlarım vardır.', icon: typeIcons[5], color: 'cyan' },
+            '6w7': { label: 'B. Kanat 7 Etkisi (İstekli):', text: 'Kaygılarıma rağmen, daha iyimser, dışa dönük, maceracı ve sosyal olmayı seven, eğlence ve heyecan arayan yanlarım vardır.', icon: typeIcons[7], color: 'lime' },
+            // Tip 7 Wings (w6, w8)
+            '7w6': { label: 'A. Kanat 6 Etkisi (Sorgulayıcı):', text: 'Neşe ve coşkumun yanında, daha planlı, tedbirli ve başkalarına karşı daha sadık, sorumluluk duygusu yüksek ve güvence arayan yanlarım vardır.', icon: typeIcons[6], color: 'stone' },
+            '7w8': { label: 'B. Kanat 8 Etkisi (Meydan Okuyan):', text: 'Maceracı ruhumun yanında, daha güçlü, doğrudan, baskın ve kendine güvenen, çatışmaktan çekinmeyen, otoriter yanlarım vardır.', icon: typeIcons[8], color: 'red' },
+            // Tip 8 Wings (w7, w9)
+            '8w7': { label: 'A. Kanat 7 Etkisi (İstekli):', text: 'Güçlü ve koruyucu olmamın yanında, daha dışa dönük, neşeli, maceracı, yeni deneyimlere açık ve hayatı dolu dolu yaşamayı seven yanlarım vardır.', icon: typeIcons[7], color: 'lime' },
+            '8w9': { label: 'B. Kanat 9 Etkisi (Barışçıl):', text: 'Güçlü ve otoriter olmama rağmen, daha sakin, uyumlu, sabırlı ve huzuru arayan, çatışmaya girmeden önce daha fazla düşünen yanlarım vardır.', icon: typeIcons[9], color: 'emerald' },
+            // Tip 9 Wings (w8, w1)
+            '9w8': { label: 'A. Kanat 8 Etkisi (Meydan Okuyan):', text: 'Barışçıl ve uyumlu olmamın yanında, zaman zaman öfkesini gösteren, daha doğrudan, kendine güvenen ve sınırlarını daha iyi çizebilen, daha aktif yanlarım vardır.', icon: typeIcons[8], color: 'red' },
+            '9w1': { label: 'B. Kanat 1 Etkisi (Reformcu):', text: 'Uyumlu ve sakin olmamın yanında, doğru olana, prensiplere ve ahlaki değerlere önem veren, daha düzenli ve eleştirel yanlarım vardır.', icon: typeIcons[1], color: 'slate' }
+        };
+
+
+        function calculateScores() {
+            typeScores = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 };
+            let answeredCount = 0;
+
+            for (let i = 1; i <= allQuestions; i++) {
+                const selected = document.querySelector(`input[name="q${i}"]:checked`);
+                if (selected) {
+                    answeredCount++;
+                    const types = selected.value.split(',').map(Number);
+                    types.forEach(type => {
+                        if (typeScores.hasOwnProperty(type)) {
+                            typeScores[type]++;
+                        }
+                    });
+                }
+            }
+
+            if (answeredCount === allQuestions) {
+                calculateBtn.disabled = false;
+                calculateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                calculateBtn.disabled = true;
+                calculateBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        // Dinamik Kanat Teyidi Aşamasına Geçiş
+        function showDynamicConfirmation(coreType) {
+            currentHighestType = coreType;
+            const details = typeDetails[coreType];
+            const [wing1, wing2] = details.wings;
+
+            // Kanat Detaylarını Al
+            const w1 = wingDetails[`${coreType}w${wing1}`];
+            const w2 = wingDetails[`${coreType}w${wing2}`];
+            
+            // Temel Tanım Metnini Oluştur
+            confirmationTextDiv.innerHTML = `
+                <p class="text-gray-700 mb-4 font-medium border-b pb-4">
+                    Testiniz ana mizacınızın <span class="font-bold text-green-700">Tip ${coreType}: ${details.name}</span> olduğunu gösteriyor. <span class="font-bold text-indigo-700">${details.core}</span> <br><br> Bununla birlikte; aşağıdaki iki ek özellik grubundan hangisi sizi daha iyi tanımlıyor?
+                </p>
+            `;
+
+            // Kanat Butonlarını Oluştur
+            wingOptionsDiv.innerHTML = `
+                <!-- Kanat 1 Seçeneği -->
+                <button data-wing="${wing1}" class="wing-btn w-full text-left p-4 border border-gray-200 rounded-lg shadow-sm hover:bg-gray-100 transition duration-200 flex items-start">
+                    <i class="${w1.icon} text-2xl text-${w1.color}-600 mr-4 mt-1"></i>
+                    <div>
+                        <span class="font-bold text-${w1.color}-700">${w1.label}</span> <br>
+                        ${w1.text}
+                    </div>
+                </button>
+                <!-- Kanat 2 Seçeneği -->
+                <button data-wing="${wing2}" class="wing-btn w-full text-left p-4 border border-gray-200 rounded-lg shadow-sm hover:bg-gray-100 transition duration-200 flex items-start">
+                    <i class="${w2.icon} text-2xl text-${w2.color}-600 mr-4 mt-1"></i>
+                    <div>
+                        <span class="font-bold text-${w2.color}-700">${w2.label}</span> <br>
+                        ${w2.text}
+                    </div>
+                </button>
+            `;
+
+            // Ekranları değiştir
+            quizContainer.classList.add('hidden');
+            resultContainer.classList.add('hidden');
+            confirmationContainer.classList.remove('hidden');
+            confirmationContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // SVG Oluşturma Fonksiyonu (Daha kalın çizgiler ve daha belirgin daire)
+        function generateEnneagramSVG(coreType, stressType, growthType) {
+            const points = ENNEAGRAM_POINTS;
+            const size = 200;
+            const lineThickness = 2.5; // Kalınlaştırıldı
+            const coreRadius = 10; // Büyütüldü
+            const innerRadius = 85;
+            
+            let svgContent = `<svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">`;
+
+            // 1. Dış Çember
+            svgContent += `<circle cx="${size/2}" cy="${size/2}" r="${innerRadius}" fill="none" stroke="#4f46e5" stroke-width="2"/>`;
+
+            // 2. Sabit Bağlantılar (Soluk, gri)
+            const lines = [[1, 4, 2, 8, 5, 7, 1], [3, 6, 9, 3]]; // Üçgen ve Altıgen
+            lines.forEach(line => {
+                let pathD = `M ${points[line[0]].x} ${points[line[0]].y}`;
+                for (let i = 1; i < line.length; i++) {
+                    pathD += ` L ${points[line[i]].x} ${points[line[i]].y}`;
+                }
+                svgContent += `<path d="${pathD}" fill="none" stroke="#e5e7eb" stroke-width="1" />`;
+            });
+
+            // 3. Noktalar (Dairenin çevresindeki 9 tip numarası)
+            for (let i = 1; i <= 9; i++) {
+                const p = points[i];
+                // Tip numarası
+                svgContent += `<text x="${p.x}" y="${p.y}" font-size="14" fill="#4f46e5" text-anchor="middle" dominant-baseline="central" font-weight="bold">${i}</text>`;
+            }
+
+            // 4. Okların Tanımlanması için Arrowhead marker'lar
+            svgContent += `
+                <defs>
+                    <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#ef4444" />
+                    </marker>
+                    <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#10b981" />
+                    </marker>
+                </defs>
+            `;
+
+            // 5. Dinamik Stres Oku (Kırmızı - Kalınlaştırıldı)
+            const pCore = points[coreType];
+            const pStress = points[stressType];
+            
+            svgContent += `
+                <line x1="${pCore.x}" y1="${pCore.y}" x2="${pStress.x}" y2="${pStress.y}" 
+                      stroke="#ef4444" stroke-width="${lineThickness}" marker-end="url(#arrowRed)" />
+            `;
+
+            // 6. Dinamik Gelişim Oku (Yeşil - Kalınlaştırıldı)
+            const pGrowth = points[growthType];
+
+            svgContent += `
+                <line x1="${pCore.x}" y1="${pCore.y}" x2="${pGrowth.x}" y2="${pGrowth.y}" 
+                      stroke="#10b981" stroke-width="${lineThickness}" marker-end="url(#arrowGreen)"/>
+            `;
+
+            // 7. Çekirdek Tipi Vurgusu (Son çizildiği için en üstte kalır)
+            svgContent += `<circle cx="${pCore.x}" cy="${pCore.y}" r="${coreRadius}" fill="#4f46e5" fill-opacity="1"/>`;
+            svgContent += `<text x="${pCore.x}" y="${pCore.y}" font-size="10" fill="white" text-anchor="middle" dominant-baseline="central" font-weight="bold">${coreType}</text>`;
+
+            svgContent += `</svg>`;
+            return svgContent;
+        }
+
+        // Nihai sonucu gösteren ana fonksiyon
+        function displayResult(coreType, confirmedWing) {
+            quizContainer.classList.add('hidden');
+            confirmationContainer.classList.add('hidden');
+            resultContainer.classList.remove('hidden');
+            resultCard.innerHTML = ''; 
+
+            const details = typeDetails[coreType];
+            const wingKey = `${coreType}w${confirmedWing}`;
+            const wing = wingDetails[wingKey];
+            const mainIcon = details.icon;
+            const color = 'text-indigo-700';
+            
+            const title = `<i class="${mainIcon} mr-3 text-3xl"></i>Çekirdek Mizacınız: ${details.name} (Tip ${coreType}w${confirmedWing})`;
+            
+            // Stres ve Gelişim Okları
+            const stressType = details.stress;
+            const growthType = details.growth;
+            const stressDetails = typeDetails[stressType];
+            const growthDetails = typeDetails[growthType];
+
+            // Ünlüler Listesi (3 TR, 3 Dünya)
+            const celebsList = details.celebs.map(c => `<li>${c}</li>`).join('');
+
+            // Stres ve Gelişim Özellikleri (Liste için ilk iki özellik)
+            const stressTraits = stressDetails.core.split(',').map(s => s.trim()).filter((_, i) => i < 2);
+            const growthTraits = growthDetails.core.split(',').map(s => s.trim()).filter((_, i) => i < 2);
+
+            // Dinamik SVG'yi Oluştur
+            const enneagramSvg = generateEnneagramSVG(coreType, stressType, growthType);
+
+
+            // Stres Açıklaması HTML
+            const stressDescriptionHtml = `
+                <p class="text-gray-700 text-xs font-normal mb-2">
+                     <i class="${stressDetails.icon} text-red-400 mr-1"></i> Tip ${stressType} (${stressDetails.name}) tipine doğru giderek zorlanma anlarınızda o mizacın <b>olumsuz özelliklerini</b> sergilersiniz.
+                </p>
+                <p class="text-xs font-normal text-gray-700 mb-1">Örneğin, Tip ${coreType} için bu, aşağıdaki özelliklerin aşırıya kaçması demektir:</p>
+                <ul class="arrow-list text-xs text-red-600 pl-4 space-y-1">
+                    ${stressTraits.map(t => `<li><b>Aşırıya kaçan:</b> ${t}</li>`).join('')}
+                </ul>
+            `;
+
+            // Gelişim Açıklaması HTML
+            const growthDescriptionHtml = `
+                <p class="text-gray-700 text-xs font-normal mb-2 text-right">
+                    <i class="${growthDetails.icon} text-green-400 mr-1"></i> Tip ${growthType} (${growthDetails.name}) tipine doğru giderek rahatlama anlarınızda o mizacın <b>olumlu özelliklerini</b> benimseyerek daha dengeli ve bütün hissedersiniz.
+                </p>
+                <p class="text-xs font-normal text-gray-700 mb-1 text-right">Örneğin, Tip ${coreType} için bu, aşağıdaki özelliklerin benimsenmesi demektir:</p>
+                <ul class="arrow-list text-xs text-green-600 pl-4 space-y-1 text-left inline-block">
+                    ${growthTraits.map(t => `<li><b>Benimsenen:</b> ${t}</li>`).join('')}
+                </ul>
+            `;
+
+            const content = `
+                <!-- Ana Tip Özellikleri -->
+                <div class="p-4 rounded-lg bg-indigo-50 border border-indigo-200 mb-4">
+                    <h3 class="text-xl font-bold text-indigo-800 mb-3 flex items-center">
+                        <i class="fa-solid fa-star mr-3 text-2xl text-indigo-600"></i>
+                        Temel Çekirdek Özellikleriniz
+                    </h3>
+                    <p class="text-gray-700">${details.core}</p>
+                </div>
+
+                <!-- Kanat Etkisi -->
+                <div class="p-4 bg-teal-50 border-l-4 border-teal-500 rounded-md flex flex-col space-y-2 mb-4">
+                    <div class="flex items-center">
+                        <i class="fa-solid fa-feather-pointed text-xl text-teal-600 mr-3"></i>
+                        <span class="font-bold text-teal-700">Kanat Etkisi: Tip ${confirmedWing} (${wing.text.split(':')[0].trim().replace(/\.$/,'')})</span>
+                    </div>
+                    <div class="text-gray-700 pl-8 flex items-start">
+                        <i class="${wing.icon} text-xl text-${wing.color}-600 mr-3 mt-1"></i>
+                        <span class="font-semibold">${wing.text.split('<br>')[1] ? wing.text.split('<br>')[1].trim() : wing.text}</span>
+                    </div>
+                </div>
+
+                <!-- Kişiler Başlığı -->
+                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4">
+                    <h4 class="font-bold text-gray-700 flex items-center mb-2">
+                        <i class="fa-solid fa-users mr-2"></i>
+                        Kişiler
+                    </h4>
+                    <ul class="text-sm text-gray-600 space-y-1 pl-4 list-disc">
+                        ${celebsList}
+                    </ul>
+                </div>
+
+
+                <!-- Stres ve Gelişim Yönü (DETAYLI VE İKONLU - ORTA ALAN: DİNAMİK SVG) -->
+                <div class="bg-gray-50 px-6 py-3 border-t border-slate-100 flex justify-between items-start text-sm font-semibold rounded-lg shadow-inner result-arrows">
+                    
+                    <!-- Stres Yönü (Başlık ve Detaylı Açıklama) -->
+                    <div class="arrow-container w-full md:w-1/3 pr-2 order-1 md:order-1 arrow-wrapper">
+                        <div class="flex items-center gap-2 text-red-500">
+                            <i class="fa-solid fa-arrow-left-long"></i>
+                            <span>Stres Yönü: Tip ${stressType} (${stressDetails.name})</span>
+                        </div>
+                        <div class="arrow-description pt-2">
+                            ${stressDescriptionHtml}
+                        </div>
+                    </div>
+
+                    <!-- ORTA ALAN SVG İKONU -->
+                    <div class="central-icon-container flex-shrink-0 order-2 md:order-2 self-center">
+                        ${enneagramSvg}
+                    </div>
+
+                    <!-- Gelişim Yönü (Başlık ve Detaylı Açıklama) -->
+                    <div class="arrow-container w-full md:w-1/3 pl-2 text-right order-3 md:order-3 arrow-wrapper">
+                        <div class="flex items-center gap-2 text-green-600 justify-end">
+                            <span>Gelişim Yönü: Tip ${growthType} (${growthDetails.name})</span>
+                            <i class="fa-solid fa-arrow-right-long"></i>
+                        </div>
+                        <div class="arrow-description pt-2">
+                            ${growthDescriptionHtml}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TÜM ENNEAGRAM TİPLERİ BUTONU -->
+                <div class="text-center mt-6">
+                    <a href="/" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-semibold rounded-full shadow-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out uppercase tracking-wider">
+                        <i class="fa-solid fa-layer-group mr-3"></i>
+                        TÜM ENNEAGRAM TİPLERİ
+                    </a>
+                </div>
+            `;
+
+            resultCard.innerHTML = `
+                <h2 class="text-2xl font-extrabold ${color} mb-4">${title}</h2>
+                ${content}
+            `;
+            resultContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Hesapla butonu (Test akışının ilk adımı)
+        calculateBtn.addEventListener('click', () => {
+            if (calculateBtn.disabled) return;
+            calculateScores();
+
+            // En yüksek skoru bulan ve net olmayanları filtreleyen fonksiyon
+            const scoresArray = Object.keys(typeScores).map(type => ({
+                type: Number(type),
+                score: typeScores[type]
+            }));
+            scoresArray.sort((a, b) => b.score - a.score);
+            
+            // Eğer en yüksek skor net değilse (ilk 2 skor eşitse), ilk çıkan tipi al (basitleştirme)
+            const highestType = scoresArray[0].type;
+            currentHighestType = highestType; 
+
+            // Kanat teyidi gerektiren tipler için dinamiğe geç. 
+            // Tüm tipler için (1-9) kanat teyidi yapacağız.
+            showDynamicConfirmation(highestType);
+        });
+
+        // Teyit butonu (Sadece Tip 1 sonucu sonrası)
+        confirmationContainer.addEventListener('click', (event) => {
+            const wingBtn = event.target.closest('.wing-btn');
+            if (wingBtn) {
+                // Seçimi vurgula (isteğe bağlı)
+                document.querySelectorAll('#wing-options .wing-btn').forEach(btn => btn.classList.remove('selected'));
+                wingBtn.classList.add('selected');
+
+                const coreType = currentHighestType; 
+                const confirmedWing = Number(wingBtn.getAttribute('data-wing'));
+                
+                // Teyit edilmiş sonucu göster
+                displayResult(coreType, confirmedWing);
+            }
+        });
+        
+        // Geri Dön butonu fonksiyonu
+        goBackBtn.addEventListener('click', () => {
+            confirmationContainer.classList.add('hidden');
+            resultContainer.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            quizContainer.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Event Listener'ları kur
+        quizContainer.addEventListener('change', (event) => {
+            if (event.target.type === 'radio') {
+                calculateScores();
+            }
+        });
+
+        // Sayfa yüklendiğinde butonu pasifleştir
+        calculateScores();
+
+    </script>
+</body>
+</html>
