@@ -318,12 +318,14 @@
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
-                // LOCAL/CANVAS ÇÖZÜMÜ: Custom token sadece Canvas'tan geliyorsa (ve doluysa) kullanılır.
+                // HATA ÇÖZÜMÜ: Custom token sadece Canvas'tan geliyorsa (ve doluysa) kullanılır.
                 // Lokal/GitHub Pages'te ise token olmadığı için anonim giriş yapılır.
                 if (typeof __initial_auth_token !== 'undefined' && initialAuthToken) {
+                    // Bu kısım Canvas içinde çalışırken özel token ile oturum açar
                     await signInWithCustomToken(auth, initialAuthToken);
                     console.log("Firebase: Özel token ile oturum açıldı.");
                 } else {
+                    // Bu kısım lokalde/GitHub Pages'te anonim giriş yapar
                     await signInAnonymously(auth);
                     console.log("Firebase: Anonim olarak oturum açıldı.");
                 }
