@@ -88,6 +88,16 @@
         .arrow-wrapper {
             flex: 1;
         }
+        /* Modal Stilleri */
+        .custom-modal {
+            transition: opacity 0.3s ease-in-out;
+            visibility: hidden;
+            opacity: 0;
+        }
+        .custom-modal.visible {
+            visibility: visible;
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="p-4 md:p-8 flex items-start justify-center">
@@ -146,7 +156,7 @@
 
             <!-- Soru 3: Kaygı ve Arzu Kaynağı -->
             <div class="step-card" data-step="3">
-                <h2 class="text-xl font-bold text-gray-700 mb-4">3. Sizi en iyi ifade eden seçeneği işaretleyiniz. </h2>
+                <h2 class="text-xl font-bold text-gray-700 mb-4">3. Sizi en iyi ifade eden seçeneği işaretleyiniz. </h2>
                 <div class="space-y-3 text-sm" data-options-container>
                     <input type="radio" id="q3a" name="q3" value="6,1" class="hidden">
                     <label for="q3a" class="option-label block p-4 border border-gray-200 rounded-lg shadow-sm text-gray-800 space-y-1">
@@ -230,7 +240,7 @@
                     <i class="fa-solid fa-arrows-split-up-and-merge mr-2"></i>
                     Son Teyit Adımı: Kanat Mizaç Teyidi
                 </h2>
-               
+                
                 <div id="confirmation-text">
                     <!-- Dinamik temel tanım buraya gelecek -->
                 </div>
@@ -238,7 +248,7 @@
                 <div id="wing-options" class="space-y-4">
                     <!-- Dinamik kanat butonları buraya gelecek -->
                 </div>
-               
+                
                 <!-- Geri Dön Butonu -->
                 <div class="mt-6 pt-4 border-t border-gray-200">
                     <button id="go-back-btn" class="px-6 py-2 bg-gray-200 text-gray-700 font-semibold rounded-full shadow-md hover:bg-gray-300 transition duration-300">
@@ -249,8 +259,153 @@
              </div>
         </div>
     </div>
+    
+    <!-- Custom Modal -->
+    <div id="custom-alert-modal" class="custom-modal fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full">
+            <h3 id="modal-title" class="text-lg font-bold mb-3"></h3>
+            <p id="modal-content" class="text-sm text-gray-700 mb-4"></p>
+            <button onclick="document.getElementById('custom-alert-modal').classList.remove('visible')" class="w-full py-2 bg-indigo-500 text-white font-semibold rounded-lg hover:bg-indigo-600">Kapat</button>
+        </div>
+    </div>
 
-    <script>
+    <!-- Uygulama ve Firebase Modülleri -->
+    <script type="module">
+        // --- Firebase/Firestore İmportları ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Firestore log seviyesini Debug olarak ayarla
+        setLogLevel('Debug');
+
+        // Global Firebase ve Uygulama Değişkenleri
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'Enneagram-Iletisim'; 
+        
+        // Kendi Firebase konfigürasyonunuz (Canvas'ta __firebase_config yoksa kullanılır)
+        const localFirebaseConfig = {
+            apiKey: "AIzaSyCFmxO6vFQIg7QcQMhflFYqD7EcT-H0nKI",
+            authDomain: "enneagram-iletisim.firebaseapp.com",
+            projectId: "enneagram-iletisim",
+            storageBucket: "enneagram-iletisim.firebasestorage.app",
+            appId: "1:323139665200:web:9baf9a7123d8de6b6d5cf5",
+            messagingSenderId: "323139665200",
+            measurementId: "G-123ZGJSPBJ"
+        };
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null; 
+        
+        let app, db, auth;
+        let currentUserId = null;
+        let isAuthReady = false;
+        let startTime = Date.now(); // Test başlangıç zamanı
+        const userAnswers = {}; // {q1: "A", q2: "C", ...} formatında cevapları tutar
+
+        // --- AUTH & FIREBASE KURULUMU ---
+        async function setupFirebase() {
+            let config;
+            
+            // Canvas ortamında çalışıyorsa global değişkeni kullan, değilse lokal konfigürasyonu kullan
+            if (typeof __firebase_config !== 'undefined') {
+                config = JSON.parse(__firebase_config);
+            } else {
+                config = localFirebaseConfig;
+            }
+
+            try {
+                app = initializeApp(config);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                // LOCAL/CANVAS ÇÖZÜMÜ: Custom token sadece Canvas'tan geliyorsa (ve doluysa) kullanılır.
+                // Lokal/GitHub Pages'te ise token olmadığı için anonim giriş yapılır.
+                if (typeof __initial_auth_token !== 'undefined' && initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                    console.log("Firebase: Özel token ile oturum açıldı.");
+                } else {
+                    await signInAnonymously(auth);
+                    console.log("Firebase: Anonim olarak oturum açıldı.");
+                }
+            } catch (error) {
+                 console.error("Firebase Kurulum Hatası:", error);
+                 showMessageModal("KRİTİK HATA", `Firebase kurulumu başarısız: ${error.message}`, true);
+                 return;
+            }
+            
+            onAuthStateChanged(auth, (user) => {
+                isAuthReady = true;
+                if (user) {
+                    currentUserId = user.uid;
+                    console.log("Firebase Oturumu Açık. UID:", currentUserId);
+                } else {
+                    currentUserId = null;
+                    console.log("Firebase Oturumu Kapalı veya Anonim.");
+                }
+            });
+        }
+        
+        // --- MODAL MESAJ GÖSTERME FONKSİYONU (alert() yerine) ---
+        function showMessageModal(title, content, isError = false) {
+            const modal = document.getElementById('custom-alert-modal');
+            const titleEl = document.getElementById('modal-title');
+            const contentEl = document.getElementById('modal-content');
+
+            titleEl.textContent = title;
+            contentEl.textContent = content;
+            titleEl.className = `text-lg font-bold mb-3 ${isError ? 'text-red-600' : 'text-green-600'}`;
+            
+            modal.classList.add('visible');
+        }
+
+        // --- VERİ KAYIT FONKSİYONU ---
+        async function saveResultToFirestore(coreType, confirmedWing, finalScores) {
+            const endTime = Date.now();
+            const durationSeconds = Math.floor((endTime - startTime) / 1000);
+            
+            if (!isAuthReady || !currentUserId || !db) {
+                console.error("HATA: Firebase hazır değil veya kullanıcı kimliği belirlenemedi. Kayıt yapılamadı.");
+                showMessageModal("Uyarı", "Veritabanı bağlantısı henüz hazır değil. Sonuçlarınız kaydedilemedi.", true);
+                return;
+            }
+
+            // Veri nesnesini oluştur
+            const resultData = {
+                // 1. Test sonuçları
+                coreType: coreType,
+                confirmedWing: confirmedWing,
+                scores: Object.values(finalScores), 
+                answers: userAnswers, 
+                durationSeconds: durationSeconds,
+
+                // 2. Otomatik sistem verileri
+                browserLanguage: navigator.language || "tr-TR",
+                deviceType: window.innerWidth > 1024 ? "Desktop" : (window.innerWidth > 600 ? "Tablet" : "Mobile"),
+                screenResolution: `${window.screen.width}x${window.screen.height}`,
+                testVersion: "1.0",
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Istanbul",
+                timestamp: (new Date()).toISOString(), 
+                userAgent: navigator.userAgent,
+                userId: currentUserId, // Kullanıcı ID'si verinin içinde de tutulur
+            };
+
+            try {
+                // KAYIT YOLU: Direkt olarak kök /tests koleksiyonuna.
+                const collectionPath = `tests`;
+                
+                // Yeni bir belge oluştur ve veriyi kaydet
+                const docRef = doc(collection(db, collectionPath));
+                await setDoc(docRef, resultData);
+
+                console.log(`Veri başarıyla kaydedildi! Koleksiyon Yolu: ${collectionPath}. Doküman ID: ${docRef.id}`, resultData);
+                showMessageModal("Kayıt Başarılı", `Sonuçlarınız veritabanında /tests altında kaydedildi.`, false);
+
+            } catch (e) {
+                console.error("Veri Kaydetme Hatası: ", e);
+                showMessageModal("HATA", `Sonuçlarınızı kaydederken bir sorun oluştu: ${e.message}. Lütfen güvenlik kurallarınızı kontrol edin.`, true);
+            }
+        }
+        
         // Mizaç tipleri, ikonlar, oklar ve ünlüler gibi tüm sabit veriler
         const typeIcons = { 1: 'fa-solid fa-scale-balanced', 2: 'fa-solid fa-heart', 3: 'fa-solid fa-trophy', 4: 'fa-solid fa-palette', 5: 'fa-solid fa-glasses', 6: 'fa-solid fa-shield-halved', 7: 'fa-solid fa-plane-departure', 8: 'fa-solid fa-fire', 9: 'fa-solid fa-dove' };
         const ENNEAGRAM_POINTS = { 9: { x: 100, y: 20 }, 1: { x: 168, y: 32 }, 2: { x: 180, y: 100 }, 3: { x: 168, y: 168 }, 4: { x: 100, y: 180 }, 5: { x: 32, y: 168 }, 6: { x: 20, y: 100 }, 7: { x: 32, y: 32 }, 8: { x: 137, y: 30 } };
@@ -353,6 +508,8 @@
 
             for (let i = 1; i <= allQuestions; i++) {
                 const selected = document.querySelector(`input[name="q${i}"]:checked`);
+                const questionKey = `q${i}`;
+
                 if (selected) {
                     answeredCount++;
                     const types = selected.value.split(',').map(Number);
@@ -361,6 +518,16 @@
                             typeScores[type]++;
                         }
                     });
+
+                    // Cevap harfini userAnswers objesine kaydet
+                    const selectedLabel = document.querySelector(`label[for="${selected.id}"]`);
+                    if (selectedLabel) {
+                        const optionLetter = selectedLabel.querySelector('.option-letter').textContent.trim().replace('.', '');
+                        userAnswers[questionKey] = optionLetter;
+                    }
+
+                } else {
+                    delete userAnswers[questionKey];
                 }
             }
 
@@ -510,6 +677,9 @@
                     ${growthTraits.map(t => `<li><b>Benimsenen:</b> ${t}</li>`).join('')}
                 </ul>
             `;
+            
+            // Gemini Butonları KALDIRILDI
+
 
             const content = `
                 <!-- Ana Tip Özellikleri -->
@@ -609,7 +779,7 @@
             showDynamicConfirmation(highestType);
         });
 
-        document.getElementById('confirmation-container').addEventListener('click', (event) => {
+        document.getElementById('confirmation-container').addEventListener('click', async (event) => {
             const wingBtn = event.target.closest('.wing-btn');
             if (wingBtn) {
                 document.querySelectorAll('#wing-options .wing-btn').forEach(btn => btn.classList.remove('selected'));
@@ -618,6 +788,10 @@
                 const coreType = currentHighestType; 
                 const confirmedWing = Number(wingBtn.getAttribute('data-wing'));
                 
+                // 1. Veriyi kaydet
+                await saveResultToFirestore(coreType, confirmedWing, typeScores);
+                
+                // 2. Sonucu göster
                 displayResult(coreType, confirmedWing);
             }
         });
@@ -636,6 +810,10 @@
         });
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Firebase kurulumunu başlat
+            setupFirebase();
+
+            // Quiz mantığını başlat
             shuffleQuestions();
             calculateScores();
         });
