@@ -513,23 +513,22 @@
 
             const content = `
                 <!-- Ana Tip Özellikleri -->
-                <div class="p-4 rounded-lg bg-indigo-50 border border-indigo-200 mb-4">
-                    <h3 class="text-xl font-bold text-indigo-800 mb-3 flex items-center">
+                 <div class="p-4 bg-indigo-50 border-l-4 border-indigo-500 rounded-md flex flex-col space-y-2 mb-4">
+                    <div class="flex items-center mb-2">
                         <i class="fa-solid fa-star mr-3 text-2xl text-indigo-600"></i>
-                        Temel Çekirdek Özellikleriniz
-                    </h3>
-                    <div class="mb-3 p-3 bg-indigo-100 rounded-lg flex items-center">
-                        <i class="${details.icon} text-2xl text-indigo-700 mr-3"></i>
-                        <span class="text-lg font-extrabold text-indigo-900">TİP ${coreType}: ${details.name.toUpperCase()}</span>
+                        <span class="font-bold text-teal-700">Temel Çekirdek: TİP ${coreType} - ${details.name.toUpperCase()}</span>
                     </div>
-                    <p class="text-gray-700">${details.core}</p>
+                    <div class="text-gray-700 pl-8 flex items-start">
+                         <i class="${details.icon} text-2xl text-indigo-700 mr-3"></i>
+                        <span class="font-semibold text-sm">${details.core}</span>
+                    </div>
                 </div>
 
                 <!-- Kanat Etkisi -->
                 <div class="p-4 bg-teal-50 border-l-4 border-teal-500 rounded-md flex flex-col space-y-2 mb-4">
                     <div class="flex items-center mb-2">
                         <i class="fa-solid fa-feather-pointed text-xl text-teal-600 mr-3"></i>
-                        <span class="font-bold text-teal-700">Kanat Etkisi: TİP ${confirmedWing}: ${wingName}</span>
+                        <span class="font-bold text-teal-700">Kanat Etkisi: TİP ${confirmedWing} - ${wingName}</span>
                     </div>
                     <div class="text-gray-700 pl-8 flex items-start">
                         <i class="${wing.icon} text-xl text-${wing.color}-600 mr-3 mt-1 flex-shrink-0"></i>
